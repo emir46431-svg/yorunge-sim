@@ -1,0 +1,35 @@
+YÖRÜNGE v0.4 — WINDOWS BAŞLANGIÇ
+
+1. ZIP dosyasını bir klasöre çıkar.
+2. yorunge-sim.exe dosyasını çift tıklayarak aç.
+3. Açılan pencereyi açık tut ve tarayıcıdan şu adrese git:
+   http://127.0.0.1:7878
+
+Hazır deneylerden birini seç, nesnelerin özelliklerini değiştir ve Çalıştır'a bas.
+Sahneyi Kaydet ile JSON dosyasına aktarabilirsin.
+Programı durdurmak için terminal penceresini kapat veya Ctrl+C tuşlarına bas.
+
+Rust veya Node.js kurulumu gerekmez. Deneyler yerel bilgisayarda hesaplanır.
+7878 portu kullanılıyorsa, önce mevcut Yörünge penceresini kontrol et.
+Alternatif port için bu klasörde PowerShell açıp şunu çalıştır:
+  .\yorunge-sim.exe serve 7879
+Ardından http://127.0.0.1:7879 adresine git.
+
+Bu sürüm molekül düzenleme, 118 element, beş malzeme örgüsü ve basit hücre
+taşınımı içerir. Her alanın model sınırları arayüzde açıklanır. Tüm kimyasal
+tepkimeleri veya gerçek canlı hücre davranışını öngörmez.
+Önceki 3B mekanik /mekanik, hava dirençli 2B atış /atis adresindedir.
+
+README.md: özellikler, API ve geliştirme talimatları.
+docs/mechanics.md: hesap modeli, birimler ve sınırlar.
+docs/chemistry.md, docs/cells.md: molekül ve hücre modelleri.
+docs/elements-materials.md: 118 elementin kaynağı ve malzeme geometrileri.
+docs/roadmap.md: diğer fizik alanları için geliştirme planı.
+docs/*licenses.txt: üçüncü taraf yazılım bildirimleri.
+
+Windows x64 üzerinde geliştirilip denendi. Farklı Windows kurulumlarında ayrıca
+uyumluluk testi yapılmadı. İnternette herkese açık bir sunucu olarak tasarlanmamıştır.
+
+Yeni biyoloji Ar-Ge: http://127.0.0.1:7878/arge
+Enzim kinetiği, inhibisyon, parametre taraması, deney defteri ve ölçüm CSV'si.
+Kullanım: docs/research-guide.md; model: docs/enzymes.md.

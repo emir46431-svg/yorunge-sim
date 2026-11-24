@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Yörünge — Biyoloji Ar-Ge</title>
+    <link rel="stylesheet" href="/science/style.css" />
+    <link rel="stylesheet" href="/research/style.css" />
+    <script type="module" src="/research/dist/research.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#research-workspace">Deneye geç</a>
+    <header class="header">
+      <a class="brand" href="/"
+        ><span class="brand-orbit" aria-hidden="true">◉</span>Yörünge<span
+          class="brand-sub"
+          >Sanal Ar-Ge</span
+        ></a
+      >
+      <div class="header-right">
+        <a href="/">Madde laboratuvarı</a><a href="/mekanik">3B mekanik</a
+        ><span class="release">v0.4</span>
+      </div>
+    </header>
+    <div class="research-nav">
+      <nav aria-label="Biyoloji çalışma alanları">
+        <a class="active" href="/arge" aria-current="page">Enzim kinetiği</a
+        ><a href="/?alan=cells">Hücre ve zar</a
+        ><a href="/?alan=molecules">Molekül taslağı</a>
+      </nav>
+      <div class="file-tools">
+        <button id="open-project">Proje aç</button
+        ><button id="save-project">Projeyi kaydet</button
+        ><input
+          id="project-file"
+          type="file"
+          accept=".json,application/json"
+          hidden
+        />
+      </div>
+    </div>
+    <main class="research-main">
+      <div class="page-intro">
+        <div>
+          <h1>Bir hipotezi deneye dönüştür.</h1>
+          <p>
+            Koşulları değiştir. Denemeleri karşılaştır. Modeli kendi ölçümünle
+            sına.
+          </p>
+        </div>
+        <span class="model-tag">Enzim kinetiği çalışma alanı</span>
+      </div>
+      <div class="project-strip">
+        <label
+          >Proje adı<input
+            id="project-title"
+            maxlength="120"
+            value="Enzim inhibisyonu araştırması" /></label
+        ><label
+          >Hipotez / çalışma notu<textarea
+            id="project-notes"
+            maxlength="10000"
+            rows="1"
+            placeholder="Hangi değişkenin neyi değiştirmesini bekliyorsun?"
+          ></textarea></label
+        ><span id="storage-status">Yerel kayıt</span>
+      </div>
+      <div id="research-status" role="status" aria-live="polite">
+        Ar-Ge çalışma alanı hazırlanıyor…
+      </div>
+      <div id="research-workspace" class="research-workspace" tabindex="-1">
+        <aside class="parameters-panel" aria-label="Deney parametreleri">
+          <section>
+            <h2>Yeni deneme</h2>
+            <div id="enzyme-presets" class="preset-pills"></div>
+            <label class="field"
+              >Deneme adı<input
+                id="trial-label"
+                maxlength="100"
+                value="Kontrol"
+            /></label>
+            <p id="draft-status" class="hint">
+              Parametreler yeni bir kayıt oluşturur; önceki sonuçlar korunur.
+            </p>
+          </section>
+          <form id="enzyme-form">
+            <fieldset id="parameter-fields">
+              <section>
+                <h2>Enzim ve substrat</h2>
+                <label class="field"
+                  >Başlangıç substratı S₀<span class="unit">µM</span
+                  ><input
+                    data-field="substrate_um"
+                    type="number"
+                    min="0.1"
+                    max="10000"
+                    step="any"
+                    required /></label
+                ><label class="field"
+                  >Başlangıç ürünü P₀<span class="unit">µM</span
+                  ><input
+                    data-field="product_um"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="any"
+                    required /></label
+                ><label class="field"
+                  >Enzim derişimi E₀<span class="unit">µM</span
+                  ><input
+                    data-field="enzyme_um"
+                    type="number"
+                    min="0"
+                    max="10"
+                    step="any"
+                    required
+                /></label>
+                <div class="row">
+                  <label class="field"
+                    >Kₘ <span class="unit">µM</span
+                    ><input
+                      data-field="km_um"
+                      type="number"
+                      min="0.01"
+                      max="10000"
+                      step="any"
+                      required /></label
+                  ><label class="field"
+                    >kcat <span class="unit">s⁻¹</span
+                    ><input
+                      data-field="kcat_per_s"
+                      type="number"
+                      min="0"
+                      max="1000"
+                      step="any"
+                      required
+                  /></label>
+                </div>
+                <p class="hint">
+                  Kₘ ve kcat, seçtiğin enzim ve deney koşuluna ait girdilerdir.
+                  Hazır değerler örnektir.
+                </p>
+              </section>
+              <section>
+                <h2>İnhibisyon</h2>
+                <label class="field"
+                  >Model<select data-field="inhibition">
+                    <option value="none">İnhibisyon yok</option>
+                    <option value="competitive">Rekabetçi</option>
+                    <option value="noncompetitive">Saf rekabetsiz</option>
+                    <option value="uncompetitive">
+                      Yarışmasız (ES kompleksine)
+                    </option>
+                    <option value="mixed">Karma</option>
+                  </select></label
+                ><label class="field"
+                  >Serbest inhibitör I<span class="unit">µM</span
+                  ><input
+                    data-field="inhibitor_um"
+                    type="number"
+                    min="0"
+                    max="10000"
+                    step="any"
+                    required
+                /></label>
+                <div class="row">
+                  <label class="field"
+                    >Kᵢ<span class="unit">µM</span
+                    ><input
+                      data-field="ki_um"
+                      type="number"
+                      min="0.01"
+                      max="10000"
+                      step="any"
+                      required /></label
+                  ><label class="field"
+                    >Kᵢ′<span class="unit">µM</span
+                    ><input
+                      data-field="ki_prime_um"
+                      type="number"
+                      min="0.01"
+                      max="10000"
+                      step="any"
+                      required
+                  /></label>
+                </div>
+                <p id="inhibition-note" class="hint"></p>
+              </section>
+              <section>
+                <h2>Etkinlik ve süre</h2>
+                <label class="field"
+                  >Bağıl enzim aktivitesi<span class="unit">0–1</span
+                  ><input
+                    data-field="activity_fraction"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="any"
+                    required
+                /></label>
+                <p class="hint">
+                  Ölçülen veya varsayılan etkinlik oranı. pH ve sıcaklık etkisi
+                  kendiliğinden hesaplanmaz.
+                </p>
+                <div class="row">
+                  <label class="field"
+                    >Süre<span class="unit">s</span
+                    ><input
+                      data-field="duration_s"
+                      type="number"
+                      min="0.1"
+                      max="3600"
+                      step="any"
+                      required /></label
+                  ><label class="field"
+                    >Örnek sayısı<input
+                      data-field="samples"
+                      type="number"
+                      min="2"
+                      max="601"
+                      step="1"
+                      required
+                  /></label>
+                </div>
+              </section>
+            </fieldset>
+            <div class="run-action">
+              <button
+                id="run-experiment"
+                type="submit"
+                class="primary full"
+                disabled
+              >
+                Denemeyi çalıştır
+              </button>
+            </div>
+          </form>
+          <details class="sweep-panel" open>
+            <summary>Parametre taraması</summary>
+            <p class="hint">
+              Tek değişkeni farklı değerlerde çalıştır; her sonuç ayrı kayıt
+              olur.
+            </p>
+            <label class="field"
+              >Değişken<select id="sweep-parameter">
+                <option value="enzyme_um">Enzim derişimi (µM)</option>
+                <option value="substrate_um">Substrat derişimi (µM)</option>
+                <option value="inhibitor_um">İnhibitör derişimi (µM)</option>
+                <option value="activity_fraction">Bağıl aktivite</option>
+              </select></label
+            ><label class="field"
+              >2–6 değer; noktalı virgülle ayır<input
+                id="sweep-values"
+                value="0.05; 0.1; 0.2" /></label
+            ><button id="run-sweep" class="full" disabled>
+              Taramayı çalıştır
+            </button>
+          </details>
+        </aside>
+        <section class="research-results" aria-label="Deney sonuçları">
+          <div class="results-heading">
+            <div>
+              <span class="eyebrow-label">Seçili hesap</span>
+              <h2 id="selected-run-label">Henüz sonuç yok</h2>
+            </div>
+            <span id="selected-run-date" class="hint"></span>
+          </div>
+          <div id="result-metrics" class="research-metrics"></div>
+          <div class="chart-panel">
+            <div class="chart-toolbar">
+              <div class="chart-tabs" role="group" aria-label="Grafik türü">
+                <button id="progress-tab" aria-pressed="true">
+                  Ürün / zaman</button
+                ><button id="rate-tab" aria-pressed="false">
+                  Hız / substrat
+                </button>
+              </div>
+              <button id="export-csv" disabled>Sonuç CSV</button>
+            </div>
+            <div id="progress-chart"></div>
+            <div id="rate-chart" hidden></div>
+            <div id="timeline-controls" class="research-transport">
+              <button id="play" disabled>Oynat</button
+              ><label for="research-time">Deney zamanı</label
+              ><input
+                id="research-time"
+                type="range"
+                min="0"
+                max="120"
+                step="0.01"
+                value="0"
+                disabled
+              /><output id="time-readout">0 s</output
+              ><select id="playback-speed" aria-label="Oynatma hızı">
+                <option value="1">1×</option>
+                <option value="5" selected>5×</option>
+                <option value="20">20×</option>
+              </select>
+            </div>
+          </div>
+          <div class="mechanism-panel">
+            <div class="section-row">
+              <h2>Enzim, substrat ve ürün</h2>
+              <span class="hint">Kinetik şema</span>
+            </div>
+            <div id="enzyme-mechanism"></div>
+            <div id="live-values" class="live-values"></div>
+          </div>
+          <section class="comparison-panel">
+            <div class="section-row">
+              <h2>Deneme karşılaştırması</h2>
+              <span class="hint">En fazla 4 eğri</span>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Deneme</th>
+                    <th>İnhibisyon</th>
+                    <th>Başlangıç hızı<br />µM/s</th>
+                    <th>Görünen Kₘ<br />µM</th>
+                    <th>Görünen Vmax<br />µM/s</th>
+                    <th>Son ürün<br />µM</th>
+                    <th>Süre<br />s</th>
+                  </tr>
+                </thead>
+                <tbody id="comparison-body"></tbody>
+              </table>
+            </div>
+            <p class="hint">
+              Farklı sürelerdeki son ürünler aynı zamanın ölçümü değildir; süre
+              sütununu birlikte değerlendir.
+            </p>
+          </section>
+          <section class="measurement-panel">
+            <div class="section-row">
+              <div>
+                <h2>Kendi ölçümünle karşılaştır</h2>
+                <p class="hint">
+                  CSV başlığı: <code>time_s,product_um</code>. Gerçek ölçümünü
+                  yükle; farklar seçili hesaba göre değerlendirilir.
+                </p>
+              </div>
+              <div class="row">
+                <button id="load-measurements">CSV yükle</button
+                ><button id="measurement-template">Şablon</button
+                ><input
+                  id="measurements-file"
+                  type="file"
+                  accept=".csv,text/csv"
+                  hidden
+                />
+              </div>
+            </div>
+            <div id="measurement-summary" class="measurement-summary">
+              Henüz ölçüm yüklenmedi. Grafikteki çizgiler model sonuçlarıdır.
+            </div>
+            <button id="clear-measurements" class="subtle" hidden>
+              Ölçümü kaldır
+            </button>
+            <p class="hint">
+              Bu karşılaştırma otomatik parametre uydurma veya biyolojik
+              doğrulama değildir. Ölçüm koşullarını ve birimleri eşleştir.
+            </p>
+          </section>
+        </section>
+        <aside class="notebook-panel" aria-label="Deney defteri">
+          <section>
+            <div class="section-row">
+              <h2>Deney defteri</h2>
+              <span id="run-count">0/12</span>
+            </div>
+            <p class="hint">
+              Bir kaydı seç; diğerlerini karşılaştırmaya ekle. Girdiler ve
+              sonuçlar birlikte saklanır.
+            </p>
+            <div id="run-list"></div>
+            <button id="undo-remove" hidden>Son kaldırılanı geri getir</button>
+          </section>
+          <section id="run-note-section" hidden>
+            <h2>Seçili denemenin notu</h2>
+            <label class="field">
+              <textarea
+                id="run-notes"
+                aria-label="Seçili denemenin notu"
+                rows="5"
+                maxlength="2000"
+                placeholder="Gözlemin, yorumun ve bir sonraki denemen…"
+              ></textarea></label
+            ><button id="load-parameters" class="full">
+              Girdilerini forma al</button
+            ><button id="remove-run" class="danger full">Kaydı kaldır</button>
+            <p class="hint">
+              Forma almak eski sonucu değiştirmez. Yeni çalıştırma yeni kayıt
+              oluşturur.
+            </p>
+          </section>
+          <section>
+            <h2>Model denetimi</h2>
+            <div id="model-checks" class="model-checks">
+              Sonuç hesaplanınca birimler ve korunum burada görünür.
+            </div>
+          </section>
+        </aside>
+      </div>
+      <details class="model-details">
+        <summary>Hesap modeli, kaynaklar ve kapsam</summary>
+        <p>
+          Tek substratın tek ürüne dönüşümünü, indirgenmiş Michaelis–Menten hız
+          yasasıyla hesaplarız. Serbest inhibitör derişimi sabit kabul edilir.
+          Ürün geri tepkimesi, ürün inhibisyonu, bağlanma geçişleri, pH/sıcaklık
+          denatürasyonu, hücre metabolizması ve DNA modellenmez.
+        </p>
+        <p>
+          Bağıl aktivite bir girdidir; belirli bir biyolojik tür veya enzime ait
+          doğrulanmış veri değildir. Kinetik inhibisyon türünden tek başına
+          gerçek bağlanma yeri çıkarılamaz. Hücre ve enzim alanları bu sürümde
+          fiziksel olarak birbirine bağlı değildir.
+        </p>
+        <p>
+          <code>v = kcat · E₀ · aktivite · S / (α Kₘ + α′ S)</code>. İlerleme
+          eğrisi bu hız yasasının tümleşik çözümünden üretilir; grafik örnek
+          sayısı çözüm doğruluğunu belirlemez.
+        </p>
+        <p>
+          <a
+            href="https://iubmb.qmul.ac.uk/kinetics/ek4t6.html"
+            target="_blank"
+            rel="noopener noreferrer"
+            >IUBMB enzim kinetiği tanımları</a
+          >
+          ·
+          <a
+            href="https://www.ncbi.nlm.nih.gov/books/NBK92001/"
+            target="_blank"
+            rel="noopener noreferrer"
+            >NIH Assay Guidance Manual: enzim inhibisyonu</a
+          >
+        </p>
+        <p>
+          Otomasyon: <code>POST /api/enzymes/simulate</code> ve
+          <code>POST /api/enzymes/sweep</code>. Aynı hesap Rust komut satırından
+          da çağrılabilir.
+        </p>
+      </details>
+      <footer>
+        <span>Yörünge Ar-Ge · Yerel çalışma alanı</span
+        ><span>Model sonucu ile gerçek ölçüm ayrı gösterilir</span>
+      </footer>
+    </main>
+  </body>
+</html>

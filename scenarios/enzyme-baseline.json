@@ -1,0 +1,14 @@
+{
+  "substrate_um": 100,
+  "product_um": 0,
+  "enzyme_um": 0.1,
+  "km_um": 30,
+  "kcat_per_s": 10,
+  "inhibition": "none",
+  "inhibitor_um": 0,
+  "ki_um": 25,
+  "ki_prime_um": 25,
+  "activity_fraction": 1,
+  "duration_s": 120,
+  "samples": 121
+}

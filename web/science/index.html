@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Yörünge — Madde ve yaşam laboratuvarı</title>
+    <link rel="stylesheet" href="/science/style.css" />
+    <script type="module" src="/science/dist/science.js"></script>
+  </head>
+  <body>
+    <a class="skip" href="#workspace">Deneye geç</a>
+    <header class="header">
+      <a class="brand" href="/" aria-label="Yörünge ana sayfa"
+        ><span class="brand-orbit" aria-hidden="true">◉</span>Yörünge<span
+          class="brand-sub"
+          >Sanal laboratuvar</span
+        ></a
+      >
+      <div class="header-right">
+        <a href="/arge">Biyoloji Ar-Ge</a><a href="/mekanik">3B mekanik</a
+        ><a href="/atis">Atış deneyi</a><span class="release">v0.4</span>
+      </div>
+    </header>
+    <div class="navigation">
+      <nav aria-label="Çalışma alanı">
+        <button data-mode="molecules" aria-current="page">Moleküller</button
+        ><button data-mode="elements">Elementler <span>118</span></button
+        ><button data-mode="materials">Malzemeler</button
+        ><button data-mode="cells">Hücre</button>
+      </nav>
+      <div class="file-tools">
+        <button id="import">Deney aç</button><button id="save">Kaydet</button
+        ><input type="file" id="file" accept="application/json,.json" hidden />
+      </div>
+    </div>
+    <main>
+      <div class="page-intro">
+        <div>
+          <h1 id="page-title">Atomlardan yapıya.</h1>
+          <p id="page-description">
+            Bir bağ kur. Bir bağı ayır. Maddenin nasıl düzenlendiğini keşfet.
+          </p>
+        </div>
+        <div class="model-tag" id="model-tag">Kovalent bağ modeli</div>
+      </div>
+      <div id="notice" role="status" aria-live="polite">
+        Laboratuvar hazırlanıyor…
+      </div>
+      <div id="workspace" class="workspace" tabindex="-1">
+        <aside id="library" class="library" aria-label="Deney araçları"></aside>
+        <section class="stage-column" aria-label="Deney görünümü">
+          <div id="scene-panel" class="scene-panel">
+            <div class="scene-top">
+              <span id="scene-title">Molekül çalışma alanı</span>
+              <div>
+                <button id="representation" aria-pressed="false">
+                  Küre–çubuk</button
+                ><button id="reset-camera">Görünümü sıfırla</button>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas
+                id="science-viewport"
+                aria-label="Etkileşimli üç boyutlu deney görünümü"
+              ></canvas>
+              <div id="viewport-error" role="alert" hidden></div>
+              <div class="scene-caption" id="scene-caption">
+                Döndür: sürükle · Yakınlaş: tekerlek
+              </div>
+              <div id="scene-legend" class="scene-legend"></div>
+            </div>
+            <div id="stage-controls" class="stage-controls"></div>
+            <div id="metrics" class="metrics"></div>
+          </div>
+          <div id="periodic-panel" class="periodic-panel" hidden></div>
+          <div id="below-stage" class="below-stage"></div>
+        </section>
+        <aside
+          id="inspector"
+          class="inspector"
+          aria-label="Seçim ve sonuçlar"
+        ></aside>
+      </div>
+      <details class="model-details">
+        <summary>Model, kaynaklar ve sınırlar</summary>
+        <div id="model-details"></div>
+      </details>
+      <footer>
+        <span>Yörünge · Yerel bilim çalışma alanı</span
+        ><span>İnsanlar ve AI araçları için aynı deney verisi</span
+        ><button id="export-result" disabled>Sonucu JSON indir</button>
+      </footer>
+    </main>
+  </body>
+</html>

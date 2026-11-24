@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#eef6fc">
+  <title>Yörünge — Taş atışı fizik deneyi</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#experiment">Deneye geç</a>
+  <header class="page-header">
+    <a class="brand" href="/" aria-label="Yörünge ana sayfa">
+      <svg viewBox="0 0 46 34" width="46" height="34" aria-hidden="true">
+        <path d="M3 29H43M6 28C15-5 32-5 40 28" fill="none" stroke="currentColor" stroke-width="2"/>
+        <circle cx="29" cy="7" r="4" fill="currentColor" stroke="white" stroke-width="2"/>
+      </svg>
+      <span>Yörünge</span>
+    </a>
+    <p class="header-note">Açık bir fizik deneyi</p>
+  </header>
+
+  <main>
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <h1 id="page-title">Taş atışı fizik deneyi</h1>
+        <p>Bir taşı, atışı ve havayı tanımlayın. Yörüngenin nasıl değiştiğini görün.</p>
+      </div>
+      <p class="model-note">Yaklaşık bir model.<br>Gerçek deneyle doğrulanmış değildir.</p>
+    </section>
+
+    <div class="lab" id="experiment">
+      <aside class="controls" aria-labelledby="settings-title">
+        <div class="panel-heading">
+          <h2 id="settings-title">Deney ayarları</h2>
+          <button type="button" class="text-button" id="restore-defaults">Varsayılanlar</button>
+        </div>
+        <form id="simulation-form">
+          <fieldset>
+            <legend>Taş</legend>
+            <div class="field-pair">
+              <div class="field">
+                <label for="mass_g">Kütle <span>g</span></label>
+                <input id="mass_g" name="mass_g" data-param type="number" min="1" max="10000" step="any" value="100" required>
+              </div>
+              <div class="field">
+                <label for="diameter_cm">Eşdeğer çap <span>cm</span></label>
+                <input id="diameter_cm" name="diameter_cm" data-param type="number" min="0.1" max="50" step="any" value="4" required>
+              </div>
+            </div>
+            <p class="field-note">Düzensiz taş, bu çapta bir küre olarak modellenir.</p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Atış</legend>
+            <div class="field-pair">
+              <div class="field">
+                <label for="speed_m_s">İlk hız <span>m/s</span></label>
+                <input id="speed_m_s" name="speed_m_s" data-param type="number" min="0" max="60" step="any" value="12" required>
+              </div>
+              <div class="field">
+                <label for="angle_deg">Atış açısı <span>°</span></label>
+                <input id="angle_deg" name="angle_deg" data-param type="number" min="-90" max="90" step="any" value="40" required aria-describedby="angle-note">
+              </div>
+            </div>
+            <div class="field">
+              <label for="height_m">Başlangıç yüksekliği <span>m</span></label>
+              <input id="height_m" name="height_m" data-param type="number" min="0" max="100" step="any" value="1.5" required>
+            </div>
+            <p class="field-note" id="angle-note">0° yatay, 90° dikey; negatif açı aşağı yönlüdür.</p>
+          </fieldset>
+
+          <fieldset>
+            <legend>Ortam</legend>
+            <div class="field-pair">
+              <div class="field">
+                <label for="gravity_m_s2">Yerçekimi <span>m/s²</span></label>
+                <input id="gravity_m_s2" name="gravity_m_s2" data-param type="number" min="0.1" max="30" step="any" value="9.80665" required>
+              </div>
+              <div class="field">
+                <label for="wind_m_s">Yatay rüzgâr <span>m/s</span></label>
+                <input id="wind_m_s" name="wind_m_s" data-param type="number" min="-30" max="30" step="any" value="0" required aria-describedby="wind-note">
+              </div>
+            </div>
+            <div class="field-pair">
+              <div class="field">
+                <label for="temperature_c">Sıcaklık <span>°C</span></label>
+                <input id="temperature_c" name="temperature_c" data-param type="number" min="-60" max="60" step="any" value="15" required>
+              </div>
+              <div class="field">
+                <label for="pressure_hpa">Basınç <span>hPa</span></label>
+                <input id="pressure_hpa" name="pressure_hpa" data-param type="number" min="0" max="1100" step="any" value="1013.25" required>
+              </div>
+            </div>
+            <p class="field-note" id="wind-note">Pozitif rüzgâr sağa, negatif rüzgâr sola eser. 0 hPa: havasız ortam.</p>
+          </fieldset>
+
+          <details class="solver-settings">
+            <summary>Model ve sayısal çözüm</summary>
+            <div class="field">
+              <label for="drag_coefficient">Sürükleme katsayısı <span>Cd</span></label>
+              <input id="drag_coefficient" name="drag_coefficient" data-param type="number" min="0" max="2" step="any" value="0.47" required>
+            </div>
+            <div class="field-pair">
+              <div class="field">
+                <label for="time_step_s">Zaman adımı <span>s</span></label>
+                <input id="time_step_s" name="time_step_s" data-param type="number" min="0.001" max="0.05" step="any" value="0.01" required>
+              </div>
+              <div class="field">
+                <label for="max_time_s">Süre sınırı <span>s</span></label>
+                <input id="max_time_s" name="max_time_s" data-param type="number" min="0.01" max="120" step="any" value="60" required>
+              </div>
+            </div>
+            <p class="field-note">Küçük adımlar daha ayrıntılı çözüm üretir. Süre / adım en fazla 120.000 olabilir.</p>
+          </details>
+
+          <label class="check-field" for="show-reference">
+            <input type="checkbox" id="show-reference">
+            <span>Havasız referansla karşılaştır<small>Aynı atış, basınç 0 hPa</small></span>
+          </label>
+          <button type="submit" class="primary-button" id="simulate-button">Simüle et <span aria-hidden="true">↗</span></button>
+          <button type="button" class="input-export" id="download-input">Girdileri JSON indir</button>
+        </form>
+      </aside>
+
+      <section class="experiment" aria-labelledby="trajectory-title">
+        <div class="plot-heading">
+          <div>
+            <h2 id="trajectory-title">Yörünge</h2>
+            <p id="plot-subtitle">Metre cinsinden konum; iki eksende aynı ölçek.</p>
+          </div>
+          <span class="result-state" id="result-state">Deney hazırlanıyor</span>
+        </div>
+
+        <div class="status-message" id="status-message" role="status" aria-live="polite">Varsayılan deney yükleniyor…</div>
+        <div class="stale-notice" id="stale-notice" hidden>Grafik önceki ayarları gösteriyor. Güncel sonucu görmek için <strong>Simüle et</strong> düğmesine basın.</div>
+
+        <div class="plot-wrap" id="plot-wrap">
+          <div class="plot-legend" aria-label="Grafik açıklaması">
+            <span><i class="legend-line" aria-hidden="true"></i>Deney</span>
+            <span id="reference-legend" hidden><i class="legend-line reference" aria-hidden="true"></i>Havasız referans</span>
+          </div>
+          <svg id="trajectory-plot" viewBox="0 0 1000 620" preserveAspectRatio="xMidYMid meet" role="img" aria-labelledby="plot-title plot-description">
+            <title id="plot-title">Taşın yörüngesi</title>
+            <desc id="plot-description">Henüz hesaplanmış bir yörünge yok.</desc>
+            <g id="plot-content">
+              <path d="M72 50V550H964" fill="none" stroke="#b9cedd" stroke-width="1"/>
+              <text x="500" y="285" text-anchor="middle" fill="#536e81" font-size="20">Deneyiniz burada çizilecek.</text>
+              <text x="500" y="316" text-anchor="middle" fill="#536e81" font-size="15">Ayarları seçin, ardından Simüle et düğmesine basın.</text>
+            </g>
+          </svg>
+          <p class="scale-note" id="scale-note">Yatay ve düşey mesafeler aynı ölçekte gösterilir.</p>
+        </div>
+
+        <div class="playback" aria-label="Yörünge animasyonu">
+          <div class="playback-buttons">
+            <button type="button" class="play-button" id="play-button" disabled><span id="play-symbol" aria-hidden="true">▶</span><span id="play-label">Oynat</span></button>
+            <button type="button" class="reset-button" id="reset-button" disabled aria-label="Animasyonu başlangıca sıfırla" title="Başlangıca dön">↺</button>
+          </div>
+          <div class="time-control">
+            <label for="time-slider">Zaman <output id="time-value" for="time-slider">0,00 / 0,00 s</output></label>
+            <input id="time-slider" type="range" min="0" max="1" step="any" value="0" disabled aria-valuetext="0 saniye">
+          </div>
+          <p class="position-readout"><span>x <output id="current-x">—</output> m</span><span>y <output id="current-y">—</output> m</span></p>
+        </div>
+        <p class="animation-note">Animasyon, hesaplanan örnekler arasında görsel geçiş yapar.</p>
+
+        <div class="results" aria-label="Deney sonuçları">
+          <div class="result-item"><h3 id="duration-label">Uçuş süresi</h3><p><output id="flight-time">—</output><span>s</span></p></div>
+          <div class="result-item"><h3>Yatay yer değiştirme</h3><p><output id="displacement">—</output><span>m</span></p></div>
+          <div class="result-item"><h3>En yüksek konum</h3><p><output id="maximum-height">—</output><span>m</span></p></div>
+        </div>
+        <div class="result-footer">
+          <p id="density-note">Hava yoğunluğu hesaplandığında burada görünür.</p>
+          <div class="downloads" aria-label="Sonucu dışa aktar">
+            <button type="button" id="download-json" disabled>Sonuç JSON</button>
+            <button type="button" id="download-csv" disabled>Yörünge CSV</button>
+          </div>
+        </div>
+
+        <details class="assumptions" open>
+          <summary>Bu deneyin sınırları</summary>
+          <div class="assumptions-body">
+            <p>Bu bir öğrenme modelidir. Taşın gerçek biçimi ve değişken hava koşulları sonucu değiştirebilir.</p>
+            <ul>
+              <li>Küresel eşdeğer çap ve sabit sürükleme katsayısı kullanılır.</li>
+              <li>Kuru hava, sabit yoğunluk ve sabit yatay rüzgâr varsayılır.</li>
+              <li>Hareket iki boyutludur; zemin düz ve sabittir.</li>
+              <li>Yağmur, türbülans, dönme ve sekme modellenmez.</li>
+              <li>Sonuçlar gerçek bir deneyle doğrulanmış değildir.</li>
+            </ul>
+            <p class="model-detail">Yerçekimi ve karesel hava sürüklemesiyle hareket hesaplanır. Basınç ve sıcaklık, kuru havanın yoğunluğunu belirler.</p>
+          </div>
+        </details>
+      </section>
+    </div>
+  </main>
+  <footer class="page-footer"><span>Yörünge</span><p>Bir değişkeni değiştirin. Sonucu gözlemleyin. Varsayımları hatırlayın.</p></footer>
+  <noscript><p class="noscript">Bu deney arayüzü için JavaScript etkin olmalıdır.</p></noscript>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "cell_volume_pl": 1.0,
+  "division_at_s": null,
+  "duration_s": 120.0,
+  "external_volume_pl": 10.0,
+  "inside_concentration_mm": 300.0,
+  "outside_concentration_mm": 60.0,
+  "sample_hz": 5,
+  "solute_permeability_pl_s": 0.0,
+  "water_permeability_pl_s_mm": 4E-05
+}

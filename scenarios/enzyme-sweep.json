@@ -1,0 +1,14 @@
+{
+  "experiment": {
+    "inhibition": "competitive",
+    "substrate_um": 100,
+    "enzyme_um": 0.1,
+    "km_um": 30,
+    "kcat_per_s": 10,
+    "ki_um": 25,
+    "duration_s": 120,
+    "samples": 121
+  },
+  "parameter": "inhibitor_um",
+  "values": [0, 25, 50]
+}

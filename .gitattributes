@@ -1,0 +1,4 @@
+# Generated Three.js bundle contains upstream shader strings; preserve their whitespace.
+web/lab/dist/lab.js -whitespace linguist-generated=true
+web/science/dist/science.js -whitespace linguist-generated=true
+web/research/dist/research.js linguist-generated=true
