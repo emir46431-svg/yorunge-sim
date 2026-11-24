@@ -1,14 +1,15 @@
 {
   "name": "yorunge-lab-ui",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "npm run build:mechanics && npm run build:science && npm run build:research",
+    "build": "npm run build:mechanics && npm run build:science && npm run build:research && npm run build:cells",
+    "build:cells": "esbuild web/cell-workbench/entry.js --bundle --minify --format=esm --outfile=web/cell-workbench/dist/cell-workbench.js --legal-comments=eof",
     "build:research": "esbuild web/research/entry.js --bundle --minify --format=esm --outfile=web/research/dist/research.js --legal-comments=eof",
     "build:mechanics": "esbuild web/lab/entry.js --bundle --minify --format=esm --outfile=web/lab/dist/lab.js --legal-comments=eof",
     "build:science": "esbuild web/science/entry.js --bundle --minify --format=esm --outfile=web/science/dist/science.js --legal-comments=eof",
-    "test": "node --test tests/materials.test.js tests/research-data.test.js",
+    "test": "node --test tests/materials.test.js tests/research-data.test.js tests/structures.test.js tests/mechanics-analysis.test.js tests/cell-workbench.test.js",
     "test:contract": "node --test tests/research-contract.test.js"
   },
   "dependencies": {

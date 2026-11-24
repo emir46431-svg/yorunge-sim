@@ -541,8 +541,9 @@ pub fn presets() -> Value {
         "modules": [
             {"id":"mechanics","name":"Katı cisim mekaniği","status":"available"},
             {"id":"fluids","name":"Akışkanlar","status":"planned"},
-            {"id":"thermal","name":"Isı ve termodinamik","status":"planned"},
-            {"id":"electromagnetism","name":"Elektrik ve manyetizma","status":"planned"}
+            {"id":"thermal","name":"Tek sıcaklıklı ısı modeli (/enerji)","status":"available"},
+            {"id":"electric","name":"DC direnç ağı (/enerji)","status":"available"},
+            {"id":"electromagnetism","name":"AC ve elektromanyetik alanlar","status":"planned"}
         ]
     })
 }

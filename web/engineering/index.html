@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="tr" class="desktop-mode">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Yörünge — Isı ve elektrik</title>
+    <link rel="stylesheet" href="/engineering/style.css" />
+    <script type="module" src="/engineering/app.js"></script>
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="/studio?alan=materials">Yörünge <b>Studio</b></a>
+      <nav aria-label="Çalışma alanları">
+        <a href="/studio?alan=materials">Yapılar</a
+        ><a href="/hucre">Hücre Ar-Ge</a><a href="/arge?studio=1">Enzim</a
+        ><a href="/mekanik?studio=1">Mekanik</a><span>Isı ve elektrik</span>
+      </nav>
+      <button id="open">Proje aç</button><button id="save">Kaydet</button
+      ><input id="file" type="file" accept=".json" hidden />
+    </header>
+    <div class="project">
+      <label
+        >Proje adı<input
+          id="project-name"
+          maxlength="120"
+          value="Yeni enerji deneyi" /></label
+      ><label
+        >Hipotez / not<input
+          id="project-note"
+          maxlength="2000"
+          placeholder="Değiştireceğin koşulu ve inceleyeceğin sonucu yaz"
+      /></label>
+    </div>
+    <div id="status" role="status">
+      Kendi devreni tanımla veya ısıl özellikleri gir. Sonuçlar Rust motorunda
+      hesaplanır.
+    </div>
+    <main>
+      <section class="panel">
+        <h1>DC direnç ağı</h1>
+        <p class="hint">
+          0: referans (0 V) · 1: ideal kaynak · 2–23: ara düğümler. Aynı numara
+          aynı elektrik bağlantısıdır.
+        </p>
+        <form id="circuit-form">
+          <label
+            >Kaynak gerilimi <span>V</span
+            ><input
+              id="voltage"
+              type="number"
+              min="-1000"
+              max="1000"
+              step="any"
+              value="12"
+              required
+          /></label>
+          <div class="scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Kimlik</th>
+                  <th>A düğümü</th>
+                  <th>B düğümü</th>
+                  <th>Direnç · Ω</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="resistors"></tbody>
+            </table>
+          </div>
+          <div class="actions">
+            <button id="add-resistor" type="button">+ Direnç</button
+            ><button type="submit" class="primary">Devreyi çöz</button
+            ><button id="circuit-csv" type="button" disabled>CSV</button>
+          </div>
+        </form>
+        <div id="circuit-summary" class="metrics"></div>
+        <div id="circuit-results"></div>
+        <details>
+          <summary>Devre modeli ve sınırları</summary>
+          <p>
+            Kirchhoff düğüm denklemleri ve Ohm yasası ile durağan DC çözümü.
+            Dirençler sabittir; kaynak idealdir. AC, kondansatör, bobin, yarı
+            iletken, kablo ısınması ve alan dağılımı hesaplanmaz.
+          </p>
+          <p>
+            Akımın pozitif yönü A → B. Güç I²R'dir. Bir ağ 0 veya 1'e
+            bağlanmıyorsa yüzen düğüm olarak reddedilir. Açık dal sıfır akım
+            taşıyabilir.
+          </p>
+          <a
+            href="https://openstax.org/books/university-physics-volume-2/pages/10-3-kirchhoffs-rules"
+            >Denklem kaynağı · OpenStax</a
+          >
+        </details>
+      </section>
+      <section class="panel">
+        <h1>Isıl deney</h1>
+        <p class="hint">
+          Tek sıcaklıklı cisim + sabit güç + ortamla taşınım. Malzeme
+          değerlerini kendi ölçümünden girebilirsin.
+        </p>
+        <form id="thermal-form">
+          <div id="thermal-fields" class="fields"></div>
+          <p id="power-source" class="hint">Isıtma gücü elle girilir.</p>
+          <div class="actions">
+            <button type="submit" class="primary">Isıyı hesapla</button
+            ><button id="thermal-csv" type="button" disabled>CSV</button>
+          </div>
+        </form>
+        <div id="thermal-summary" class="metrics"></div>
+        <div id="thermal-chart"></div>
+        <div id="thermal-energy"></div>
+        <details>
+          <summary>Isı modeli ve sınırları</summary>
+          <p>
+            m·c·dT/dt = P − h·A·(T − Tₒ). Cisim içinde sıcaklık farkı olmadığı
+            varsayılır; malzeme özellikleri sabittir. Işınım, uzaysal iletim ve
+            faz değişimi hesaplanmaz. Uygunluk için geometri, iletkenlik ve Biot
+            sayısı ayrıca değerlendirilmelidir.
+          </p>
+          <p>
+            Devreden güç aktarmak tek yönlüdür. Sıcaklık, direnci veya devre
+            akımını değiştirmez. Aktarılan gücün tamamının bu cisme girdiği
+            varsayılır.
+          </p>
+          <a
+            href="https://bpb-us-e1.wpmucdn.com/sites.mit.edu/dist/6/1810/files/2024/04/AHTTv600.pdf"
+            >Denklem kaynağı · A Heat Transfer Textbook</a
+          >
+        </details>
+      </section>
+    </main>
+    <footer>
+      Yerel hesap · SI birimleri · Sabit özellikli modeller · Gerçek deney
+      kalibrasyonu uygulanmadı
+    </footer>
+  </body>
+</html>

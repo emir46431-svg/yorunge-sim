@@ -54,9 +54,11 @@ export function createViewport(canvas, { onSelect = () => {}, onTransform = () =
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
 
+  const desktopMode = document.documentElement.classList.contains('desktop-mode');
+  const backgroundColor = desktopMode ? 0x25272b : 0xf2f7fc;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xf2f7fc);
-  scene.fog = new THREE.Fog(0xf2f7fc, 55, 180);
+  scene.background = new THREE.Color(backgroundColor);
+  scene.fog = new THREE.Fog(backgroundColor, 55, 180);
   const camera = new THREE.PerspectiveCamera(43, 1, 0.03, 250);
   camera.position.set(13, 10, 16);
   const orbit = new OrbitControls(camera, canvas);
@@ -96,13 +98,13 @@ export function createViewport(canvas, { onSelect = () => {}, onTransform = () =
 
   const floor = new THREE.Mesh(
     new THREE.PlaneGeometry(160, 160),
-    new THREE.MeshStandardMaterial({ color: 0xe5eef6, roughness: 0.97, metalness: 0 }),
+    new THREE.MeshStandardMaterial({ color: desktopMode ? 0x34373c : 0xe5eef6, roughness: 0.97, metalness: 0 }),
   );
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -0.008;
   floor.receiveShadow = true;
   scene.add(floor);
-  const grid = new THREE.GridHelper(60, 60, 0x9cb7cb, 0xc6d8e5);
+  const grid = new THREE.GridHelper(60, 60, desktopMode ? 0x777d86 : 0x9cb7cb, desktopMode ? 0x535860 : 0xc6d8e5);
   grid.position.y = 0.002;
   grid.material.transparent = true;
   grid.material.opacity = 0.72;

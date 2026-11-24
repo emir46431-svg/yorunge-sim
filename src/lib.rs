@@ -6,6 +6,7 @@ use std::f64::consts::PI;
 
 pub mod cells;
 pub mod chemistry;
+pub mod engineering;
 pub mod enzymes;
 pub mod lab;
 

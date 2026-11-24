@@ -5,3 +5,5 @@
 !.env.example
 *.log
 /node_modules/
+/desktop/bin/
+/desktop/cache/

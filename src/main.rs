@@ -10,12 +10,33 @@ use yorunge_sim::{Parameters, simulate_json};
 const MAX_INPUT_BYTES: u64 = 16_384;
 const MAX_SCENE_BYTES: u64 = 262_144;
 
+fn studio_html(source: &str, enabled: bool) -> String {
+    if !enabled {
+        return source.into();
+    }
+    source
+        .replacen(
+            "<html lang=\"tr\">",
+            "<html lang=\"tr\" class=\"desktop-mode\">",
+            1,
+        )
+        .replacen(
+            "</head>",
+            "<link rel=\"stylesheet\" href=\"/studio/theme.css\"></head>",
+            1,
+        )
+}
+
 fn serve(port: u16) -> Result<(), String> {
     let address = format!("127.0.0.1:{port}");
     let server = Server::http(&address).map_err(|e| format!("Sunucu açılamadı: {e}"))?;
     eprintln!("Yörünge hazır: http://{address}\nDurdurmak için Ctrl+C.");
     for mut request in server.incoming_requests() {
         let path = request.url().split('?').next().unwrap_or("").to_owned();
+        let studio = request
+            .url()
+            .split_once('?')
+            .is_some_and(|(_, query)| query.split('&').any(|part| part == "studio=1"));
         let method = request.method().as_str().to_owned();
         let origin_allowed = request
             .headers()
@@ -37,12 +58,29 @@ fn serve(port: u16) -> Result<(), String> {
                 ("GET", "/") => (
                     200,
                     "text/html; charset=utf-8",
-                    include_str!("../web/science/index.html").into(),
+                    if studio { include_str!("../web/studio/index.html").into() }
+                    else { include_str!("../web/science/index.html").into() },
                 ),
+                ("GET", "/studio") => (
+                    200,
+                    "text/html; charset=utf-8",
+                    include_str!("../web/studio/index.html").into(),
+                ),
+                ("GET", "/studio/theme.css") => (
+                    200,
+                    "text/css; charset=utf-8",
+                    include_str!("../web/studio/theme.css").into(),
+                ),
+                ("GET", "/enerji") => (200, "text/html; charset=utf-8", include_str!("../web/engineering/index.html").into()),
+                ("GET", "/engineering/style.css") => (200, "text/css; charset=utf-8", include_str!("../web/engineering/style.css").into()),
+                ("GET", "/engineering/app.js") => (200, "text/javascript; charset=utf-8", include_str!("../web/engineering/app.js").into()),
+                ("GET", "/hucre") => (200, "text/html; charset=utf-8", include_str!("../web/cell-workbench/index.html").into()),
+                ("GET", "/assets/cell-workbench.css") => (200, "text/css; charset=utf-8", include_str!("../web/cell-workbench/style.css").into()),
+                ("GET", "/assets/cell-workbench.js") => (200, "text/javascript; charset=utf-8", include_str!("../web/cell-workbench/dist/cell-workbench.js").into()),
                 ("GET", "/arge") => (
                     200,
                     "text/html; charset=utf-8",
-                    include_str!("../web/research/index.html").into(),
+                    studio_html(include_str!("../web/research/index.html"), studio),
                 ),
                 ("GET", "/research/style.css") => (
                     200,
@@ -89,6 +127,8 @@ fn serve(port: u16) -> Result<(), String> {
                     "/api/chemistry/analyze"
                     | "/api/cells/simulate"
                     | "/api/enzymes/simulate"
+                    | "/api/engineering/thermal"
+                    | "/api/engineering/circuit"
                     | "/api/enzymes/sweep",
                 ) => {
                     let limit = if path == "/api/chemistry/analyze" {
@@ -112,6 +152,8 @@ fn serve(port: u16) -> Result<(), String> {
                             "/api/chemistry/analyze" => yorunge_sim::chemistry::analyze_json(&body),
                             "/api/enzymes/simulate" => yorunge_sim::enzymes::simulate_json(&body),
                             "/api/enzymes/sweep" => yorunge_sim::enzymes::sweep_json(&body),
+                            "/api/engineering/thermal" => yorunge_sim::engineering::thermal_json(&body),
+                            "/api/engineering/circuit" => yorunge_sim::engineering::circuit_json(&body),
                             _ => yorunge_sim::cells::simulate_json(&body),
                         };
                         match result {
@@ -123,12 +165,12 @@ fn serve(port: u16) -> Result<(), String> {
                 ("GET", "/mekanik") => (
                     200,
                     "text/html; charset=utf-8",
-                    include_str!("../web/lab/index.html").into(),
+                    studio_html(include_str!("../web/lab/index.html"), studio),
                 ),
                 ("GET", "/atis") => (
                     200,
                     "text/html; charset=utf-8",
-                    include_str!("../web/index.html").into(),
+                    studio_html(include_str!("../web/index.html"), studio),
                 ),
                 ("GET", "/lab/style.css") => (
                     200,
@@ -185,7 +227,9 @@ fn serve(port: u16) -> Result<(), String> {
                     "application/json",
                     serde_json::to_string_pretty(&Parameters::default()).unwrap(),
                 ),
-                ("GET", "/api/health") => (200, "application/json", "{\"status\":\"ok\"}".into()),
+                ("GET", "/api/health") => (200, "application/json", serde_json::json!({
+                    "status": "ok", "application": "yorunge", "version": env!("CARGO_PKG_VERSION")
+                }).to_string()),
                 ("POST", "/api/simulate") => {
                     let mut body = String::new();
                     let read = request
@@ -251,7 +295,7 @@ fn run() -> Result<(), String> {
             serve(port)
         }
         "simulate" | "lab-simulate" | "chemistry-analyze" | "cells-simulate"
-        | "enzymes-simulate" | "enzymes-sweep"
+        | "enzymes-simulate" | "enzymes-sweep" | "thermal-simulate" | "circuit-solve"
             if args.len() <= 2 =>
         {
             let limit = if args[0] == "lab-simulate" || args[0] == "chemistry-analyze" {
@@ -286,6 +330,8 @@ fn run() -> Result<(), String> {
                     "cells-simulate" => yorunge_sim::cells::simulate_json(&input)?,
                     "enzymes-simulate" => yorunge_sim::enzymes::simulate_json(&input)?,
                     "enzymes-sweep" => yorunge_sim::enzymes::sweep_json(&input)?,
+                    "thermal-simulate" => yorunge_sim::engineering::thermal_json(&input)?,
+                    "circuit-solve" => yorunge_sim::engineering::circuit_json(&input)?,
                     _ => simulate_json(&input)?,
                 }
             );
@@ -315,6 +361,9 @@ fn run() -> Result<(), String> {
             Ok(())
         }
         "--help" | "-h" | "help" => {
+            println!(
+                "Studio: /studio · Hücre Ar-Ge: /hucre · Isı ve elektrik: /enerji\nyorunge-sim thermal-simulate scenarios/thermal.json\nyorunge-sim circuit-solve scenarios/circuit.json"
+            );
             println!(
                 "Biyoloji Ar-Ge: /arge\nyorunge-sim enzymes-simulate scenarios/enzyme-baseline.json\nyorunge-sim enzymes-sweep scenarios/enzyme-sweep.json\nyorunge-sim enzymes-presets\n"
             );

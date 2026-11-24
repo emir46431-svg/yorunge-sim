@@ -1,0 +1,1278 @@
+/* The ordinary web application keeps its light theme. The native host opts in. */
+html.desktop-mode {
+  color-scheme: dark;
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 12px;
+  color: #e0e2e5;
+  background: #202124;
+  --ink: #e0e2e5;
+  --muted: #aeb3bb;
+  --line: #45484e;
+  --teal: #668eaf;
+  --blue: #668eaf;
+  --paper: #2c2e32;
+  --white: #2c2e32;
+  --soft: #35383e;
+  --radius: 3px;
+  --studio-base: #202124;
+  --studio-panel: #2c2e32;
+  --studio-raised: #373a40;
+  --studio-field: #24262a;
+  --studio-accent: #e5ac75;
+  --studio-selected: #3c5267;
+  --studio-focus: #9fc9ef;
+  scrollbar-color: #62666e #27292d;
+  scrollbar-width: thin;
+}
+html.desktop-mode body {
+  background: var(--studio-base);
+  color: var(--ink);
+}
+html.desktop-mode * {
+  box-sizing: border-box;
+}
+html.desktop-mode ::selection {
+  background: #54718e;
+  color: #fff;
+}
+html.desktop-mode :is(button, input, select, textarea) {
+  font-family: inherit;
+}
+html.desktop-mode button {
+  min-height: 27px;
+  padding: 5px 9px;
+  border: 1px solid #4a4e55;
+  border-radius: 3px;
+  background: var(--studio-raised);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 500;
+  box-shadow: none;
+}
+html.desktop-mode button:hover:not(:disabled) {
+  background: #474b52;
+  border-color: #7c8796;
+}
+html.desktop-mode button:disabled {
+  opacity: 0.5;
+}
+html.desktop-mode button.primary {
+  background: #466786;
+  border-color: #7495b4;
+  color: #fff;
+}
+html.desktop-mode button.primary:hover:not(:disabled) {
+  background: #557b9e;
+}
+html.desktop-mode :is(button.danger, .danger) {
+  color: #ffaaa3;
+}
+html.desktop-mode a {
+  color: #b2d2ee;
+}
+html.desktop-mode
+  :is(
+    button,
+    a,
+    input,
+    select,
+    textarea,
+    summary,
+    [tabindex="0"]
+  ):focus-visible {
+  outline: 2px solid var(--studio-focus);
+  outline-offset: 2px;
+}
+html.desktop-mode
+  :is(input:not([type="range"]):not([type="checkbox"]), select, textarea) {
+  color: var(--ink);
+  background: var(--studio-field);
+  border: 1px solid #50545d;
+  border-radius: 3px;
+  font-size: 11px;
+  padding: 6px 7px;
+}
+html.desktop-mode :is(input, select, textarea):disabled {
+  color: #9ca2ab;
+  background: #303238;
+}
+html.desktop-mode input::placeholder,
+html.desktop-mode textarea::placeholder {
+  color: #9ba1ab;
+}
+html.desktop-mode input[type="range"],
+html.desktop-mode input[type="checkbox"] {
+  accent-color: #8bb4d9;
+}
+html.desktop-mode input[type="range"] {
+  min-height: 18px;
+}
+html.desktop-mode
+  :is(label, .field, .hint, .material-info, .science-note, .empty) {
+  color: var(--muted);
+}
+html.desktop-mode :is(label > span, summary > span, .field .unit) {
+  color: #a5acb6;
+}
+html.desktop-mode :is(h2, h3) {
+  color: var(--ink);
+}
+html.desktop-mode h2 {
+  font-size: 11px;
+  letter-spacing: 0.15px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+html.desktop-mode h3 {
+  font-size: 11px;
+}
+html.desktop-mode .hint {
+  font-size: 10px;
+  line-height: 1.55;
+}
+html.desktop-mode .skip {
+  background: var(--studio-selected);
+  color: white;
+}
+html.desktop-mode
+  :is(.library, .inspector, .parameters-panel, .notebook-panel) {
+  background: var(--studio-panel);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  scrollbar-gutter: stable;
+}
+html.desktop-mode
+  :is(.library, .inspector, .parameters-panel, .notebook-panel)
+  section {
+  padding: 13px 12px;
+  border-color: var(--line);
+}
+html.desktop-mode :is(.library, .inspector) section + section {
+  margin-top: 0;
+}
+html.desktop-mode :is(.library, .inspector) p {
+  overflow-wrap: anywhere;
+}
+html.desktop-mode .library section > .full + .full {
+  margin-top: 5px;
+}
+html.desktop-mode .preset-list {
+  gap: 4px;
+}
+html.desktop-mode :is(.preset-button, .presets button) {
+  background: #32353a;
+  border-color: #41454c;
+  padding: 8px 9px;
+  gap: 3px;
+}
+html.desktop-mode
+  :is(
+    .preset-button.active,
+    .atom-list button.selected,
+    .body-list button.active,
+    .mode-buttons .selected,
+    .run-card.selected,
+    .chart-tabs button[aria-pressed="true"]
+  ) {
+  color: #eef6ff;
+  border-color: #7195b8;
+  background: var(--studio-selected);
+}
+html.desktop-mode .preset-button.active {
+  box-shadow: inset 2px 0 var(--studio-accent);
+}
+html.desktop-mode .preset-button strong {
+  font-size: 11px;
+}
+html.desktop-mode .preset-button small {
+  color: #b9bec6;
+  font-size: 10px;
+}
+html.desktop-mode
+  :is(
+    .selection-summary,
+    .explanation,
+    .chart-box,
+    .periodic-panel,
+    .chart-panel,
+    .mechanism-panel,
+    .comparison-panel,
+    .measurement-panel,
+    .measurement-summary,
+    .run-card,
+    .research-metrics .stat
+  ) {
+  color: var(--ink);
+  background: var(--studio-panel);
+  border-color: var(--line);
+  border-radius: 3px;
+}
+html.desktop-mode
+  :is(
+    .explanation strong,
+    .component .formula,
+    .element-hero .large-symbol,
+    .stat strong,
+    .metric strong,
+    .material-info strong,
+    .live-values strong,
+    .measurement-stats strong,
+    .model-checks strong
+  ) {
+  color: #d4e6f6;
+}
+html.desktop-mode
+  :is(
+    .component,
+    .bond-row,
+    .event,
+    .live-values,
+    .chart-toolbar,
+    .comparison-panel th,
+    .comparison-panel td
+  ) {
+  border-color: var(--line);
+}
+html.desktop-mode :is(.pill, .status-badge, .mode-label) {
+  background: #33483f;
+  color: #b3ddc8;
+}
+html.desktop-mode .pill.incomplete {
+  background: #4a4031;
+  color: #edcd96;
+}
+html.desktop-mode :is(.model-checks .warning, .readout-warning) {
+  color: #edc68c !important;
+}
+html.desktop-mode :is(.model-details, .modules-panel, .api-panel) {
+  color: var(--muted);
+  background: #292b2f;
+  border-color: var(--line);
+  border-radius: 3px;
+  padding: 8px 12px;
+  font-size: 11px;
+}
+html.desktop-mode
+  :is(.model-details summary, .modules-panel summary, .api-panel summary) {
+  color: #c3c9d1;
+}
+html.desktop-mode
+  :is(.model-details code, .api-panel code, .measurement-panel code) {
+  background: #202226;
+  color: #c2d3e3;
+}
+html.desktop-mode :is(.scene-panel, .scene-toolbar, .scene-top) {
+  background: var(--studio-panel);
+  border-color: var(--line);
+  border-radius: 0;
+}
+html.desktop-mode :is(.scene-top, .scene-toolbar) {
+  padding: 7px 10px;
+  font-size: 11px;
+  color: #d0d5dc;
+}
+html.desktop-mode .scene-top button {
+  background: #383c42;
+  border-color: #525861;
+  color: #e0e5ec;
+  padding: 4px 8px;
+  font-size: 10px;
+}
+html.desktop-mode .scene-top button:hover:not(:disabled) {
+  background: #4a5059 !important;
+}
+html.desktop-mode :is(.canvas-wrap, .viewport-wrap) {
+  background: #25272b;
+}
+html.desktop-mode :is(.scene-caption, .scene-guide, .scale-guide) {
+  color: #bec7d1;
+  background: #24272bd9;
+  border-radius: 2px;
+}
+html.desktop-mode .scene-caption {
+  padding: 5px 7px;
+  left: 10px;
+  bottom: 10px;
+}
+html.desktop-mode
+  :is(
+    .stage-controls,
+    .metrics,
+    .transport,
+    .readouts,
+    .research-transport,
+    .run-action
+  ) {
+  background: #303237;
+  border-color: var(--line);
+}
+html.desktop-mode .stage-controls {
+  padding: 8px 10px;
+  gap: 6px;
+  border-top: 1px solid var(--line);
+}
+html.desktop-mode .stage-controls .hint {
+  margin: 0;
+}
+html.desktop-mode .stage-controls button {
+  font-size: 10px;
+}
+html.desktop-mode .metrics {
+  padding: 10px 12px;
+  gap: 10px;
+}
+html.desktop-mode .metric strong {
+  font-size: 18px;
+  letter-spacing: 0;
+}
+html.desktop-mode .metric span {
+  margin-bottom: 4px;
+}
+html.desktop-mode .atom-tools button {
+  font-size: 16px;
+  padding: 6px 0;
+}
+html.desktop-mode .element-h {
+  background: #4d5560 !important;
+  color: #fff;
+}
+html.desktop-mode .element-c {
+  background: #394452 !important;
+  color: #d9e8fb;
+}
+html.desktop-mode .element-n {
+  background: #354570 !important;
+  color: #cad9ff;
+}
+html.desktop-mode .element-o {
+  background: #693d3c !important;
+  color: #ffd4cf;
+}
+html.desktop-mode .properties {
+  gap: 10px;
+}
+html.desktop-mode .chart text,
+html.desktop-mode .research-chart text,
+html.desktop-mode .research-mechanism text {
+  fill: #b9c5d1;
+}
+html.desktop-mode :is(.research-chart, .research-mechanism) [stroke="#e3ecee"] {
+  stroke: #4b525c;
+}
+html.desktop-mode .research-chart-legend {
+  color: #b9c5d1 !important;
+}
+html.desktop-mode .research-chart [data-chart-trace],
+html.desktop-mode .research-chart [data-trace-endpoint],
+html.desktop-mode .research-chart-legend svg,
+html.desktop-mode .run-dot {
+  filter: brightness(1.5) saturate(0.8);
+}
+html.desktop-mode .research-mechanism [fill="#f8fbfb"] {
+  fill: #25282d;
+}
+html.desktop-mode .research-mechanism [fill="#e1f3ef"] {
+  fill: #304d4b;
+}
+html.desktop-mode .research-mechanism :is([fill="#f0eafa"], [fill="#f1edf8"]) {
+  fill: #473b58;
+}
+html.desktop-mode .research-mechanism [fill="#fff1cf"] {
+  fill: #57452b;
+}
+html.desktop-mode .research-mechanism [stroke="#ded4ec"] {
+  stroke: #77678b;
+}
+html.desktop-mode .chart line {
+  stroke: #4b525c;
+}
+html.desktop-mode .chart polyline {
+  stroke: #83c7c4;
+}
+html.desktop-mode #chart-marker {
+  stroke: #e4bb86;
+}
+html.desktop-mode .periodic-panel {
+  padding: 14px;
+}
+html.desktop-mode .periodic-tools {
+  margin-bottom: 12px;
+}
+html.desktop-mode .element-tile.selected {
+  outline-color: #f3c697;
+}
+html.desktop-mode .c-alkali-metal {
+  background: #5a4037;
+  color: #f1c6b5;
+}
+html.desktop-mode .c-alkaline-earth-metal {
+  background: #50482e;
+  color: #e9d9a4;
+}
+html.desktop-mode .c-transition-metal {
+  background: #30475b;
+  color: #c3dcef;
+}
+html.desktop-mode .c-post-transition-metal {
+  background: #304b4d;
+  color: #bce4e1;
+}
+html.desktop-mode .c-metalloid {
+  background: #3e4e35;
+  color: #cee1bd;
+}
+html.desktop-mode .c-nonmetal {
+  background: #354d36;
+  color: #c0e4b8;
+}
+html.desktop-mode .c-halogen {
+  background: #30504b;
+  color: #b8e4da;
+}
+html.desktop-mode .c-noble-gas {
+  background: #4b3e62;
+  color: #dbceee;
+}
+html.desktop-mode :is(.c-lanthanoid, .c-lanthanide) {
+  background: #563c51;
+  color: #ecc7df;
+}
+html.desktop-mode :is(.c-actinoid, .c-actinide) {
+  background: #563d47;
+  color: #eecbd4;
+}
+html.desktop-mode .c-unknown {
+  background: #42464c;
+  color: #d2d7df;
+}
+
+/* The Studio shell: one window, independently scrolling editor panes. */
+html.desktop-mode .studio-body {
+  height: 100vh;
+  height: 100dvh;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+html.desktop-mode .studio-menubar {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  height: 37px;
+  flex: 0 0 37px;
+  padding: 0 12px;
+  background: #25272b;
+  border-bottom: 1px solid #17191c;
+}
+html.desktop-mode .studio-brand {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #e6e8eb;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+html.desktop-mode .studio-brand strong {
+  font-weight: 400;
+  color: #bdc3cc;
+}
+html.desktop-mode .studio-mark {
+  font-size: 21px;
+  line-height: 1;
+  color: var(--studio-accent);
+  margin-right: 3px;
+}
+html.desktop-mode .studio-version {
+  margin-left: auto;
+  color: #aeb5bf;
+  font-size: 10px;
+}
+html.desktop-mode .studio-menubar .file-tools {
+  gap: 4px;
+}
+html.desktop-mode .studio-menubar button {
+  border-color: transparent;
+  background: transparent;
+  min-height: 25px;
+  padding: 4px 8px;
+}
+html.desktop-mode .studio-menubar button:hover:not(:disabled) {
+  background: var(--studio-raised);
+  border-color: #555b65;
+}
+html.desktop-mode .studio-workspaces {
+  flex: 0 0 auto;
+  min-height: 34px;
+  height: auto;
+  padding: 0 10px;
+  background: #25272b;
+  border-color: #15171a;
+  gap: 12px;
+}
+html.desktop-mode .studio-workspaces nav {
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  flex-wrap: nowrap;
+}
+html.desktop-mode .studio-workspaces nav :is(button, a) {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+  padding: 8px 12px;
+  margin-top: 2px;
+  color: #b9bec6;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  text-decoration: none;
+}
+html.desktop-mode .studio-workspaces nav :is(button, a):hover {
+  background: #34373c;
+  color: #fff;
+}
+html.desktop-mode .studio-workspaces nav button[aria-current="page"] {
+  background: #3c3f45;
+  color: #fff;
+  border-color: #4b4f56;
+  box-shadow: inset 0 2px var(--studio-accent);
+}
+html.desktop-mode .studio-workspaces nav button span {
+  margin: 0;
+  color: #bec7d2;
+  background: #292c31;
+  font-size: 9px;
+  padding: 1px 4px;
+  border-radius: 2px;
+}
+html.desktop-mode .studio-workspace-label {
+  color: #939ba6;
+  font-size: 10px;
+  white-space: nowrap;
+}
+html.desktop-mode .studio-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 4px 4px 0;
+  gap: 4px;
+}
+html.desktop-mode .studio-main .workspace {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr) 250px;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 0;
+  flex: 1 1 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: hidden;
+}
+html.desktop-mode .studio-main .workspace > :is(.library, .inspector) {
+  display: block;
+  grid-column: auto;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+  padding: 0;
+}
+html.desktop-mode .studio-main :is(.library, .inspector) section {
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+}
+html.desktop-mode .studio-main :is(.library, .inspector) section:last-child {
+  border-bottom: 0;
+}
+html.desktop-mode .studio-main .stage-column {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  gap: 4px;
+  overflow: auto;
+}
+html.desktop-mode .studio-main .scene-panel {
+  display: flex;
+  flex: 1 0 320px;
+  flex-direction: column;
+  min-height: 320px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+}
+html.desktop-mode .studio-main .scene-top {
+  flex: 0 0 auto;
+  min-height: 36px;
+}
+html.desktop-mode .studio-main .scene-top > span {
+  font-weight: 600;
+}
+html.desktop-mode .studio-main .canvas-wrap {
+  flex: 1 1 0;
+  height: auto;
+  min-height: 215px;
+}
+html.desktop-mode .studio-main :is(.stage-controls, .metrics) {
+  flex: 0 0 auto;
+}
+html.desktop-mode .studio-main .below-stage {
+  flex: 0 0 auto;
+  margin: 0;
+  max-height: 165px;
+  overflow: auto;
+}
+html.desktop-mode .studio-main .below-stage:empty {
+  display: none;
+}
+html.desktop-mode .studio-main :is(.explanation, .chart-box) {
+  padding: 10px 12px;
+  font-size: 10px;
+  line-height: 1.6;
+}
+html.desktop-mode .studio-main .chart {
+  height: 112px;
+}
+html.desktop-mode .studio-main .science-note {
+  margin: 6px 0;
+}
+html.desktop-mode .studio-main .periodic-mode {
+  grid-template-columns: minmax(0, 1fr) 250px;
+}
+html.desktop-mode .studio-main .periodic-mode .library {
+  display: none;
+}
+html.desktop-mode .studio-main .periodic-panel {
+  min-width: 0;
+  flex: 1 0 auto;
+}
+html.desktop-mode .studio-main .periodic-grid {
+  min-width: 650px;
+  gap: 3px;
+}
+html.desktop-mode .studio-main .element-tile {
+  min-height: 50px;
+}
+html.desktop-mode .studio-main .studio-details {
+  margin: 0;
+  flex: 0 0 auto;
+  max-height: 190px;
+  overflow: auto;
+  border-radius: 2px;
+  padding: 6px 10px;
+  font-size: 10px;
+}
+html.desktop-mode .studio-context {
+  padding-top: 10px;
+}
+html.desktop-mode .studio-context h1 {
+  font-size: 13px;
+  letter-spacing: 0;
+}
+html.desktop-mode .studio-context p {
+  font-size: 11px;
+}
+html.desktop-mode .studio-statusbar {
+  flex: 0 0 auto;
+  min-height: 27px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 3px 10px;
+  background: #24262a;
+  color: #acb4bf;
+  font-size: 10px;
+  border-top: 1px solid #17191c;
+}
+html.desktop-mode .studio-statusbar #notice {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  color: #c1cfbe;
+  font-size: 10px;
+  line-height: 1.5;
+  padding: 0;
+}
+html.desktop-mode .studio-statusbar #notice.error {
+  color: #ffb7af;
+}
+html.desktop-mode .studio-statusbar .model-tag {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #b8c1cd;
+  font-size: 10px;
+  margin-left: 0;
+}
+html.desktop-mode .studio-local {
+  white-space: nowrap;
+}
+
+/* Existing research and mechanics screens use the same native window palette. */
+html.desktop-mode :is(.header, .topbar) {
+  min-height: 37px;
+  height: 37px;
+  padding: 0 12px;
+  background: #25272b;
+  border-bottom: 1px solid #181a1d;
+  gap: 12px;
+}
+html.desktop-mode :is(.header, .topbar) .brand {
+  font:
+    600 15px "Segoe UI",
+    Arial,
+    sans-serif;
+  color: #e7eaee;
+  letter-spacing: 0;
+  gap: 7px;
+}
+html.desktop-mode .brand-orbit {
+  font-size: 21px;
+  color: var(--studio-accent);
+}
+html.desktop-mode :is(.brand-sub, .topbar .brand span) {
+  font:
+    400 10px "Segoe UI",
+    Arial,
+    sans-serif;
+  color: #b6bdc7;
+  margin-left: 5px;
+  padding-left: 8px;
+  opacity: 1;
+}
+html.desktop-mode .header-right {
+  gap: 17px;
+  font-size: 11px;
+}
+html.desktop-mode :is(.release, .version) {
+  color: #b6bdc7;
+  background: #35383e;
+  border-radius: 2px;
+  padding: 3px 6px;
+  font-size: 10px;
+}
+html.desktop-mode .topbar nav {
+  gap: 15px;
+}
+html.desktop-mode .topbar nav :is(a, button) {
+  font-size: 11px;
+}
+html.desktop-mode .topbar .active-tab {
+  font-size: 11px;
+  padding: 11px 0 9px;
+  border-color: var(--studio-accent);
+}
+html.desktop-mode :is(.file-actions, .file-tools) {
+  gap: 5px;
+}
+html.desktop-mode .file-actions button {
+  background: #353940;
+  border-color: #4d535c;
+  font-size: 10px;
+}
+html.desktop-mode .research-nav {
+  min-height: 35px;
+  padding: 0 12px;
+  background: #282a2e;
+  border-color: #191b1e;
+}
+html.desktop-mode .research-nav nav {
+  gap: 18px;
+}
+html.desktop-mode .research-nav nav a {
+  padding: 10px 0 8px;
+  font-size: 11px;
+  border-bottom-width: 2px;
+}
+html.desktop-mode .research-nav nav a.active {
+  color: #f0d1af;
+  border-color: var(--studio-accent);
+}
+html.desktop-mode .research-nav .file-tools button {
+  font-size: 10px;
+  padding: 4px 8px;
+}
+html.desktop-mode body:has(.research-main) {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+html.desktop-mode body:has(.research-main) > :is(.header, .research-nav) {
+  flex: 0 0 auto;
+}
+html.desktop-mode .research-main {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  padding: 5px;
+}
+html.desktop-mode .research-main > .page-intro {
+  display: none;
+}
+html.desktop-mode .project-strip {
+  grid-template-columns: 220px 1fr auto;
+  gap: 14px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 3px;
+  background: var(--studio-panel);
+}
+html.desktop-mode .project-strip :is(input, textarea) {
+  min-height: 25px;
+  padding: 3px 6px;
+  font-size: 11px;
+}
+html.desktop-mode .project-strip label {
+  gap: 3px;
+}
+html.desktop-mode .project-strip #storage-status {
+  display: block;
+  grid-column: auto;
+  color: #b8d3bd;
+}
+html.desktop-mode #research-status {
+  flex: 0 0 auto;
+  min-height: 25px;
+  padding: 6px 8px;
+  font-size: 10px;
+  color: #c0d1c5;
+}
+html.desktop-mode #research-status.error {
+  color: #ffb7af;
+}
+html.desktop-mode .research-workspace {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-columns: 220px minmax(0, 1fr) 235px;
+  gap: 4px;
+  align-items: stretch;
+}
+html.desktop-mode
+  .research-workspace
+  > :is(.parameters-panel, .research-results, .notebook-panel) {
+  min-height: 0;
+  overflow: auto;
+}
+html.desktop-mode .research-workspace > .notebook-panel {
+  display: block;
+  grid-column: auto;
+}
+html.desktop-mode .research-workspace .notebook-panel section {
+  border-right: 0;
+  border-bottom: 1px solid var(--line);
+}
+html.desktop-mode .research-workspace .notebook-panel section:last-child {
+  border-bottom: 0;
+}
+html.desktop-mode .research-results {
+  padding: 8px;
+  border: 1px solid var(--line);
+  background: #26282c;
+  border-radius: 3px;
+}
+html.desktop-mode .results-heading {
+  margin-bottom: 8px;
+}
+html.desktop-mode .results-heading h2 {
+  font-size: 15px;
+}
+html.desktop-mode .research-metrics {
+  gap: 4px;
+  margin-bottom: 6px;
+}
+html.desktop-mode .research-metrics .stat {
+  padding: 8px 10px;
+}
+html.desktop-mode .stat strong {
+  font-size: 19px;
+  margin: 4px 0;
+}
+html.desktop-mode .stat small {
+  color: #b5becb;
+}
+html.desktop-mode .chart-toolbar {
+  padding: 7px 9px;
+  gap: 5px;
+}
+html.desktop-mode .chart-tabs {
+  gap: 3px;
+}
+html.desktop-mode .chart-tabs button {
+  font-size: 10px;
+  padding: 5px 7px;
+  background: #373b42;
+}
+html.desktop-mode .research-chart {
+  min-height: 200px;
+  padding: 0 10px 8px;
+}
+html.desktop-mode .research-transport {
+  gap: 6px;
+  padding: 8px;
+}
+html.desktop-mode :is(.mechanism-panel, .comparison-panel, .measurement-panel) {
+  margin-top: 6px;
+  padding: 10px;
+}
+html.desktop-mode
+  :is(
+    .live-values,
+    .comparison-panel th,
+    .run-card label,
+    .measurement-summary
+  ) {
+  color: #b9c6d3;
+}
+html.desktop-mode .measurement-summary.error {
+  background: #4c3439;
+  color: #ffc3bd;
+}
+html.desktop-mode .run-card {
+  padding: 8px;
+}
+html.desktop-mode .run-card.selected > button {
+  background: transparent;
+}
+html.desktop-mode .run-action {
+  padding: 10px 12px;
+}
+html.desktop-mode .run-action button {
+  padding: 8px;
+}
+html.desktop-mode .sweep-panel {
+  padding: 12px;
+}
+html.desktop-mode .research-main > .model-details {
+  flex: 0 0 auto;
+  max-height: 180px;
+  overflow: auto;
+  margin: 4px 0 0;
+  padding: 6px 9px;
+}
+html.desktop-mode .research-main footer {
+  padding: 6px 5px 1px;
+  font-size: 10px;
+  color: #adb5c0;
+}
+html.desktop-mode body:has(> .topbar) {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+html.desktop-mode body:has(> .topbar) > .topbar {
+  flex: 0 0 auto;
+}
+html.desktop-mode body:has(> .topbar) > main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1 1 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 4px;
+}
+html.desktop-mode body:has(> .topbar) .intro {
+  display: none;
+}
+html.desktop-mode #message {
+  flex: 0 0 auto;
+  padding: 5px 8px;
+  min-height: 25px;
+  font-size: 10px;
+}
+html.desktop-mode #message[data-kind="error"] {
+  color: #ffb7af;
+}
+html.desktop-mode body:has(> .topbar) .workspace {
+  flex: 1 1 0;
+  min-height: 0;
+  grid-template-columns: 210px minmax(0, 1fr) 240px;
+  gap: 4px;
+  align-items: stretch;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+html.desktop-mode body:has(> .topbar) :is(.library, .inspector) {
+  min-height: 0;
+  max-height: none;
+  height: 100%;
+  padding: 12px 10px;
+  overflow: auto;
+}
+html.desktop-mode body:has(> .topbar) .library section {
+  padding: 0;
+  margin-bottom: 18px;
+}
+html.desktop-mode body:has(> .topbar) .experiment {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: var(--studio-panel);
+}
+html.desktop-mode .scene-toolbar {
+  flex: 0 0 auto;
+  height: 36px;
+  gap: 7px;
+}
+html.desktop-mode .scene-toolbar button {
+  padding: 4px 8px;
+  font-size: 10px;
+}
+html.desktop-mode body:has(> .topbar) .viewport-wrap {
+  flex: 1 0 235px;
+  height: auto;
+  min-height: 235px;
+}
+html.desktop-mode .shape-buttons button {
+  font-size: 10px;
+  padding: 6px 3px;
+}
+html.desktop-mode .shape-buttons span {
+  color: #b7cde2;
+  font-size: 22px;
+}
+html.desktop-mode .transport {
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  gap: 5px;
+}
+html.desktop-mode .transport button {
+  font-size: 10px;
+  padding: 5px 7px;
+}
+html.desktop-mode .speed-label {
+  margin-left: auto;
+}
+html.desktop-mode .speed-label select {
+  font-size: 10px;
+  padding: 4px;
+  width: 66px;
+}
+html.desktop-mode .timeline-label {
+  padding: 0 10px;
+  margin: 6px 0;
+}
+html.desktop-mode .readouts {
+  flex: 0 0 auto;
+  grid-template-columns: 1fr 1fr 1fr 1.4fr;
+  padding: 10px;
+  margin-top: 5px;
+  gap: 8px;
+}
+html.desktop-mode .readouts strong {
+  font-size: 11px;
+}
+html.desktop-mode .readouts span {
+  font-size: 9px;
+  margin-bottom: 4px;
+}
+html.desktop-mode .experiment-footer {
+  flex: 0 0 auto;
+  padding: 4px 10px 8px;
+}
+html.desktop-mode .experiment-footer button {
+  font-size: 9px;
+}
+html.desktop-mode .experiment-footer p {
+  margin: 0;
+}
+html.desktop-mode .inspector details {
+  border-color: var(--line);
+}
+html.desktop-mode .edit-hint {
+  color: #ecd1a1;
+  background: #4a4032;
+}
+html.desktop-mode :is(.modules-panel, .api-panel) {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  padding: 6px 10px;
+  max-height: 170px;
+  overflow: auto;
+}
+html.desktop-mode .module-card span {
+  color: #b0bac7;
+}
+html.desktop-mode #canvas-error {
+  background: #4c3439;
+  border-color: #bf858b;
+  color: #ffe0dc;
+}
+
+@media (min-width: 1550px) {
+  html.desktop-mode .studio-main .workspace {
+    grid-template-columns: 235px minmax(0, 1fr) 275px;
+  }
+  html.desktop-mode .studio-main .periodic-mode {
+    grid-template-columns: minmax(0, 1fr) 275px;
+  }
+  html.desktop-mode .research-workspace {
+    grid-template-columns: 245px minmax(0, 1fr) 260px;
+  }
+}
+@media (max-width: 1100px) {
+  html.desktop-mode .studio-main .workspace {
+    grid-template-columns: 190px minmax(0, 1fr) 220px;
+  }
+  html.desktop-mode .studio-main .periodic-mode {
+    grid-template-columns: minmax(0, 1fr) 220px;
+  }
+  html.desktop-mode .studio-workspace-label {
+    display: none;
+  }
+  html.desktop-mode .studio-workspaces nav :is(button, a) {
+    padding-inline: 10px;
+  }
+  html.desktop-mode .research-workspace {
+    grid-template-columns: 200px minmax(0, 1fr) 205px;
+  }
+  html.desktop-mode .research-transport {
+    flex-wrap: wrap;
+  }
+  html.desktop-mode .research-transport input {
+    min-width: 100px;
+  }
+  html.desktop-mode .project-strip {
+    grid-template-columns: 190px 1fr auto;
+  }
+  html.desktop-mode .chart-toolbar {
+    flex-wrap: wrap;
+  }
+  html.desktop-mode .measurement-panel > .section-row {
+    flex-wrap: wrap;
+  }
+  html.desktop-mode body:has(> .topbar) .workspace {
+    grid-template-columns: 185px minmax(0, 1fr) 210px;
+  }
+  html.desktop-mode .topbar nav {
+    gap: 10px;
+  }
+  html.desktop-mode .topbar .brand span {
+    display: none;
+  }
+}
+@media (max-width: 800px) {
+  html.desktop-mode .studio-body,
+  html.desktop-mode body:has(.research-main),
+  html.desktop-mode body:has(> .topbar) {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+  html.desktop-mode .studio-menubar {
+    gap: 8px;
+    padding-inline: 8px;
+  }
+  html.desktop-mode .studio-menubar .file-tools {
+    margin-left: auto;
+  }
+  html.desktop-mode .studio-menubar button {
+    font-size: 10px;
+    padding-inline: 5px;
+  }
+  html.desktop-mode .studio-version {
+    display: none;
+  }
+  html.desktop-mode .studio-workspaces {
+    overflow-x: auto;
+    padding: 0 4px;
+  }
+  html.desktop-mode .studio-main,
+  html.desktop-mode .research-main,
+  html.desktop-mode body:has(> .topbar) > main {
+    flex: 0 0 auto;
+  }
+  html.desktop-mode .studio-main .workspace,
+  html.desktop-mode body:has(> .topbar) .workspace {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "scene scene" "library inspector";
+    overflow: visible;
+  }
+  html.desktop-mode .studio-main .stage-column {
+    grid-area: scene;
+  }
+  html.desktop-mode .studio-main .library {
+    grid-area: library;
+  }
+  html.desktop-mode .studio-main .inspector {
+    grid-area: inspector;
+  }
+  html.desktop-mode .studio-main .workspace > :is(.library, .inspector) {
+    height: auto;
+    max-height: 500px;
+  }
+  html.desktop-mode .studio-main .scene-panel {
+    flex: 0 0 auto;
+    min-height: 480px;
+  }
+  html.desktop-mode .studio-main .canvas-wrap {
+    min-height: 340px;
+  }
+  html.desktop-mode .studio-main .periodic-mode {
+    grid-template-columns: 1fr;
+    grid-template-areas: "scene" "inspector";
+  }
+  html.desktop-mode .studio-statusbar {
+    flex-wrap: wrap;
+    gap: 5px 12px;
+  }
+  html.desktop-mode .studio-statusbar #notice {
+    flex-basis: 100%;
+  }
+  html.desktop-mode .studio-local {
+    margin-left: auto;
+  }
+  html.desktop-mode .research-workspace {
+    grid-template-columns: 210px minmax(0, 1fr);
+    align-items: start;
+  }
+  html.desktop-mode .research-workspace .notebook-panel {
+    grid-column: 1 / -1;
+  }
+  html.desktop-mode .project-strip {
+    grid-template-columns: 1fr 1fr;
+  }
+  html.desktop-mode .project-strip #storage-status {
+    display: none;
+  }
+  html.desktop-mode
+    .research-workspace
+    > :is(.parameters-panel, .research-results, .notebook-panel) {
+    overflow: visible;
+  }
+  html.desktop-mode body:has(> .topbar) .viewport-wrap {
+    min-height: 340px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html.desktop-mode *,
+  html.desktop-mode *::before,
+  html.desktop-mode *::after {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

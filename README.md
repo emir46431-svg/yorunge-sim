@@ -2,20 +2,23 @@
 
 İnsanların ve AI araçlarının deney kurup sonuç inceleyebildiği yerel bilim çalışma alanı.
 
-**v0.4**, hücre, molekül, element, malzeme ve mekanik alanlarına **enzim kinetiği ve araştırma defteri** ekler. Koşulları tara, denemeleri karşılaştır, gerçek ölçüm CSV'sini yükleyip model farklarını incele. Her alanın hesap kapsamı ayrıdır; tüm doğayı tek doğrulukta simüle ettiği iddia edilmez.
+**v0.5 Studio**, Blender'dan esinlenen koyu çalışma alanını kendi Windows penceresinde açar. 118 elementle özel atom dizilimi oluştur; hücre, enzim ve mekanik deneylerini düzenle, koşulları karşılaştır ve sonuçları dışa aktar. DC direnç ağı ve tek sıcaklıklı ısı modeli de bulunur. Her alanın hesap kapsamı ayrıdır; tüm doğayı tek doğrulukta simüle ettiği iddia edilmez.
 
 ## Başlat
 
-Windows ZIP paketini çıkar, `yorunge-sim.exe` dosyasını aç ve pencereyi açık tut. Tarayıcıdan **http://127.0.0.1:7878** adresine git. Rust veya Node.js kurulumu gerekmez. Programı durdurmak için terminali kapat veya `Ctrl+C` kullan.
+Windows ZIP paketini bir klasöre çıkar ve **`Yorunge.exe`** dosyasına çift tıkla. Tüm paket dosyalarını aynı klasörde tut. Uygulama kendi penceresinde açılır; kapanınca kendi hesap motorunu da durdurur. Windows x64, .NET Framework 4.8+ ve Microsoft WebView2 Runtime gerekir. Rust veya Node.js kurulumu gerekmez. [Masaüstü ayrıntıları ve derleme](desktop/README.md).
 
-Yeni biyoloji Ar-Ge alanı: **http://127.0.0.1:7878/arge**. Başlangıç için [adım adım araştırma kılavuzunu](docs/research-guide.md) aç.
+Malzemeler → **Özel yapı düzenle** ile atom ekle, elementini ve Å koordinatlarını değiştir, örgü üret veya XYZ dosyası aç. Hücre Ar-Ge, Enzim Ar-Ge, Mekanik ve Isı ve elektrik üst sekmelerden açılır. JSON dosyalarıyla projeleri saklayabilirsin. Önceki tarayıcı oturumundaki kayıtları taşımak için oradan JSON kaydet ve uygulamada aç.
 
-Kaynak koddan çalıştırmak için Rust kurulu bilgisayarda `cargo run` komutunu kullan. Port doluysa `cargo run -- serve 7879` veya hazır pakette `.\yorunge-sim.exe serve 7879` çalıştır. İlk kaynak derlemesi bağımlılıkları indirebilir; hazır paket ve sonraki deneyler yerel çalışır, API anahtarı gerektirmez.
+Kaynak koddan yerel web/API sunucusunu çalıştırmak için `cargo run` komutunu kullan; adresi **http://127.0.0.1:7878**, Studio görünümü `/studio` yolundadır. Port doluysa `cargo run -- serve 7879` çalıştır. Masaüstü sürümü kendi motoru için 17971 portunu kullanır. İlk kaynak derlemesi bağımlılıkları indirebilir; hazır paket ve deneyler yerel çalışır, API anahtarı gerektirmez.
 
 ## Çalışma alanları
 
 | Alan | Yapabileceklerin | Hesap kapsamı |
 |---|---|---|
+| Özel yapılar | 118 element, 1000 atom, Å koordinatları, SC/BCC/FCC örgü, XYZ/JSON aktarımı, geri alma | Geometrik düzenleme; kararlılık, enerji veya tepkime tahmini değil |
+| Hücre Ar-Ge (`/hucre`) | Özel girdiler, 2–6 koşullu tarama, 12 kayıtlık defter, dört eğri ve CSV | Sonlu iki bölmede pasif taşınım; tüm hücre biyolojisi değil |
+| Isı ve elektrik (`/enerji`) | 48 dirençli DC ağ, düğüm gerilimleri, güç; ısıtma/soğuma grafiği ve CSV | İdeal sabit dirençler; sabit özellikli tek sıcaklık modeli; güç tek yönlü aktarılır |
 | Biyoloji Ar-Ge (`/arge`) | Enzim/substrat, beş inhibisyon seçeneği, 2–6 koşullu tarama, dört eğri, 12 kayıtlık defter, ölçüm CSV'si ve RMSE/MAE | İndirgenmiş Michaelis–Menten tümleşik ilerleme modeli; belirli bir enzime kalibre edilmedi |
 | Moleküller | H/C/N/O atomu ekle; tek/çift/üçlü bağ kur veya ayır; parçaları gör; geri al/yinele | Valans sınırları ve tam bağlantı grafı eşleştirmesi |
 | Elementler | 118 elementi ad, simge veya numarayla ara; aileye göre süz; atom/elektron bilgilerini incele | PubChem kaynaklı referans kataloğu ve şematik elektron kabukları |
@@ -76,6 +79,7 @@ Katı cisim, bağ grafı, kristal geometri, hücre taşınımı ve enzim kineti�
 Ar-Ge projesi `yorunge-research` sürüm 1 JSON'dur: hipotez, girdiler, notlar ve ölçümler saklanır; sonuçlar açılışta yeniden hesaplanır. API/CLI ham `experiment` alır; proje zarfını doğrudan gönderme. Ölçüm karşılaştırması doğrusal ara değerleme kullanır; otomatik parametre uydurma değildir.
 
 - [Molekül şeması ve sınırlar](docs/chemistry.md)
+- [Özel yapı editörü ve XYZ](docs/structures.md), [Hücre Ar-Ge](docs/cell-workbench.md), [Isı ve elektrik](docs/engineering.md)
 - [Biyoloji Ar-Ge kullanım kılavuzu](docs/research-guide.md), [enzim denklemleri ve API](docs/enzymes.md)
 - [Hücre denklemleri, birimler ve sınırlar](docs/cells.md)
 - [Element kaynağı ve kristal geometrileri](docs/elements-materials.md)
@@ -105,10 +109,14 @@ Arayüz paketleri repoda bulunur; yalnız Rust ile başlatmak için Node.js gere
 | `src/enzymes.rs` | Enzim ilerleme eğrisi, inhibisyon ve parametre taraması |
 | `src/lab.rs`, `src/lib.rs` | 3B/2B mekanik |
 | `src/main.rs` | Yerel HTTP sunucusu ve CLI |
+| `src/engineering.rs` | Isıl kapasite ve DC düğüm çözümü |
+| `desktop/`, `web/studio/` | Windows penceresi, yaşam döngüsü ve koyu çalışma alanı |
+| `web/science/structures.js` | Özel atom yapıları, örgü üretimi ve XYZ |
+| `web/cell-workbench/`, `web/engineering/` | Hücre, ısı ve elektrik çalışma alanları |
 | `web/science/entry.js`, `viewer.js` | Arayüz ve 3B gösterim |
 | `web/science/catalog.js`, `data/periodic-table.json` | Element verisi |
 | `web/science/materials.js` | Kristal geometrileri |
 | `web/research/` | Araştırma defteri, grafikler, CSV ölçüm karşılaştırması ve proje dosyaları |
 | `tests/` | Rust hesap, Node veri/geometri ve CLI–arayüz sözleşme testleri |
 
-Üçüncü taraf bildirimleri: [Three.js](docs/third-party-licenses.txt), [Rust bağımlılıkları](docs/rust-third-party-licenses.txt). Element kaynağı ve alınma tarihi veri dosyasında korunur.
+Üçüncü taraf bildirimleri: [Three.js](docs/third-party-licenses.txt), [Rust bağımlılıkları](docs/rust-third-party-licenses.txt). Windows paketinde WebView2 bildirimi de bulunur. Element kaynağı ve alınma tarihi veri dosyasında korunur.

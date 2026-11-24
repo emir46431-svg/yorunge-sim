@@ -1,60 +1,547 @@
 <!doctype html>
 <html lang="tr">
-<head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Yörünge — 3B fizik laboratuvarı</title>
-  <link rel="stylesheet" href="/lab/style.css">
-  <script type="module" src="/lab/dist/lab.js"></script>
-</head>
-<body>
-  <header class="topbar">
-    <a class="brand" href="/">Yörünge<span>Sanal laboratuvar</span></a>
-    <nav aria-label="Laboratuvarlar"><a href="/">Madde ve yaşam</a><span class="active-tab">3B mekanik</span><a href="/atis">Atış deneyi</a><button id="modules-button">Diğer fizik alanları</button></nav>
-    <div class="file-actions"><button id="import-button">Deney aç</button><button id="save-button">Kaydet</button><input id="scene-file" type="file" accept="application/json,.json" hidden></div>
-  </header>
-  <main>
-    <div class="intro"><div><h1>Bir deney kur.</h1><p>Nesneleri yerleştir, özelliklerini değiştir ve ne olduğunu izle.</p></div><span class="version">Mekanik önizleme · v0.4</span></div>
-    <div id="message" role="status" aria-live="polite">Laboratuvar hazırlanıyor…</div>
-    <div class="workspace">
-      <aside class="library" aria-label="Deney araçları">
-        <section><h2>Nesne ekle</h2><div class="shape-buttons"><button data-add="sphere"><span aria-hidden="true">●</span>Küre</button><button data-add="box"><span aria-hidden="true">▣</span>Kutu</button><button data-add="cylinder"><span aria-hidden="true">▥</span>Silindir</button></div><p class="hint">Sahnede seç; renkli eksenlerden tutarak taşı.</p></section>
-        <section><h2>Hazır deneyler</h2><div id="presets" class="presets"></div></section>
-        <section><div class="section-row"><h2>Sahnedeki nesneler</h2><span id="body-count">0</span></div><div id="body-list" class="body-list"></div><button class="subtle full" id="clear-button">Boş deney oluştur</button></section>
-        <section><h2>Ortam</h2><label>Yerçekimi <span>m/s², aşağı yön</span><input id="gravity" type="number" min="-30" max="30" step="0.01" value="9.81"></label><label>Zemin sürtünmesi<input id="floor-friction" type="number" min="0" max="2" step="0.05" value="0.7"></label><label>Deney süresi <span>s</span><input id="duration" type="number" min="0.1" max="30" step="0.1" value="10"></label></section>
-        <details class="spring-section"><summary>Yay bağlantıları</summary><p class="hint">İki nesnenin merkezini yayla bağla. Birini sabitleyerek asılı sistem kurabilirsin.</p><label>Birinci nesne<select id="spring-a"></select></label><label>İkinci nesne<select id="spring-b"></select></label><label>Doğal uzunluk <span>m</span><input id="spring-length" type="number" min="0.1" max="20" step="0.1" value="1.5"></label><label>Yay sertliği <span>N/m</span><input id="spring-stiffness" type="number" min="0.1" max="500" step="1" value="40"></label><label>Sönüm <span>N·s/m</span><input id="spring-damping" type="number" min="0" max="50" step="0.1" value="2"></label><button id="add-spring" class="full">Yayı bağla</button><div id="spring-list"></div></details>
-      </aside>
-      <section class="experiment" aria-label="3B deney alanı">
-        <div class="scene-toolbar"><div class="mode-buttons"><button id="translate-button" class="selected" aria-pressed="true">Taşı</button><button id="rotate-button" aria-pressed="false">Döndür</button></div><button id="camera-button">Kamerayı sıfırla</button><span id="mode-label" class="mode-label">Kurulum</span></div>
-        <div class="viewport-wrap"><canvas id="viewport" aria-label="Nesneleri seçmek, taşımak ve deneyi izlemek için üç boyutlu sahne"></canvas><div id="canvas-error" hidden></div><div class="scene-guide">Sol sürükle: kamerayı döndür · Sağ sürükle: kaydır · Tekerlek: yakınlaş</div><div class="scale-guide">Izgara: 1 m</div></div>
-        <div class="transport"><button id="run-button" class="primary" disabled>Çalıştır</button><button id="step-button" disabled>Bir kare</button><button id="edit-button">Kuruluma dön</button><label class="speed-label">Oynatma<select id="playback-speed"><option value="0.25">¼ hız</option><option value="0.5">½ hız</option><option value="1" selected>1× hız</option><option value="2">2× hız</option></select></label><output id="time-output">0,00 s</output></div>
-        <label class="timeline-label" for="timeline">Deney zamanı<input type="range" id="timeline" min="0" max="10" step="0.001" value="0" disabled></label>
-        <div class="readouts"><div><span>Seçili nesne</span><strong id="selected-label">—</strong></div><div><span>Yükseklik</span><strong id="readout-height">—</strong></div><div><span>Hız</span><strong id="readout-speed">—</strong></div><div><span>Konum (x, y, z)</span><strong id="readout-position">—</strong></div></div>
-        <div class="experiment-footer"><p>Deney önce hesaplanır; zaman çubuğuyla her anına dönebilirsin.</p><button id="export-result" disabled>Sonuçları JSON indir</button></div>
-      </section>
-      <aside class="inspector" aria-label="Nesne özellikleri">
-        <h2>Nesne özellikleri</h2><p id="no-selection" class="hint">Sahneden veya listeden bir nesne seç.</p>
-        <form id="body-form" hidden>
-          <p id="edit-hint" class="edit-hint" hidden>Değişiklik yapmak için “Kuruluma dön” düğmesine bas.</p>
-          <fieldset id="body-fields">
-            <label>Ad<input id="body-label" maxlength="80"></label>
-            <label>Malzeme hazır ayarı<select id="material"><option value="stone">Taş</option><option value="wood">Ahşap</option><option value="rubber">Kauçuk</option><option value="steel">Çelik</option></select></label>
-            <p class="hint">Örnek sürtünme ve esneklik değerleri. Kütleyi ayrıca ayarla.</p>
-            <label>Kütle <span>g</span><input id="mass" type="number" min="10" max="1000000" step="10"></label>
-            <div class="triplet"><label id="size-x-label">En / çap <span>cm</span><input id="size-x" type="number" min="10" max="1000" step="1"></label><label>Boy <span>cm</span><input id="size-y" type="number" min="10" max="1000" step="1"></label><label>Derinlik <span>cm</span><input id="size-z" type="number" min="10" max="1000" step="1"></label></div>
-            <label class="check"><input id="fixed" type="checkbox">Yerine sabitle</label>
-            <details open><summary>Konum <span>m</span></summary><div class="triplet"><label>X<input id="pos-x" type="number" min="-40" max="40" step="0.1"></label><label>Y<input id="pos-y" type="number" min="0" max="40" step="0.1"></label><label>Z<input id="pos-z" type="number" min="-40" max="40" step="0.1"></label></div></details>
-            <details><summary>Dönüş <span>derece</span></summary><div class="triplet"><label>X<input id="rot-x" type="number" min="-360" max="360" step="5"></label><label>Y<input id="rot-y" type="number" min="-360" max="360" step="5"></label><label>Z<input id="rot-z" type="number" min="-360" max="360" step="5"></label></div></details>
-            <details><summary>Başlangıç hızı <span>m/s</span></summary><div class="triplet"><label>X<input id="vel-x" type="number" min="-30" max="30" step="0.1"></label><label>Y<input id="vel-y" type="number" min="-30" max="30" step="0.1"></label><label>Z<input id="vel-z" type="number" min="-30" max="30" step="0.1"></label></div></details>
-            <details><summary>Dönme hızı <span>rad/s</span></summary><div class="triplet"><label>X<input id="spin-x" type="number" min="-20" max="20" step="0.1"></label><label>Y<input id="spin-y" type="number" min="-20" max="20" step="0.1"></label><label>Z<input id="spin-z" type="number" min="-20" max="20" step="0.1"></label></div></details>
-            <details><summary>Çarpışma özellikleri</summary><label>Sürtünme<input id="friction" type="number" min="0" max="2" step="0.05"></label><label>Esneklik <span>0–1</span><input id="restitution" type="number" min="0" max="1" step="0.05"></label><p class="hint">Esneklik yükseldikçe çarpışmada daha fazla sekme oluşur. İki yüzeyin değerleri birlikte kullanılır.</p></details>
-          </fieldset>
-          <div class="object-actions"><button id="duplicate-button" type="button">Çoğalt</button><button id="delete-button" type="button" class="danger">Nesneyi sil</button></div>
-        </form>
-        <details class="limits"><summary>Modelin sınırları</summary><p>Bu sürüm katı cisim mekaniği içindir. Nesneler şekil değiştirmez; malzemeler yaklaşık hazır ayarlardır.</p><p>Akışkan, ısı, elektrik, kırılma ve hava direnci bu 3B motorda henüz yok. Atış deneyinde ayrı bir hava direnci modeli bulunur.</p><p>Gerçek deneylerle doğrulanmış mühendislik hesabı değildir. Ölçek ve başlangıçta çakışan nesneler sonucu etkiler.</p></details>
-      </aside>
-    </div>
-    <details id="modules-panel" class="modules-panel"><summary>Tek laboratuvar, farklı fizik alanları</summary><div id="module-list" class="module-list"></div><p>Planlanan alanlar bu sürümde çalışmaz. Aynı sahne ve nesne düzeninin üzerine, ayrı doğrulama testleriyle eklenecekler.</p></details>
-    <details class="api-panel"><summary>AI ile deney kurma</summary><p>Bir AI, kaydedilen sahne JSON'unu değiştirip aynı hesaplama motoruna gönderebilir. Çıktı bütün nesnelerin zaman içindeki konumlarını ve hızlarını içerir.</p><code>POST /api/lab/simulate</code><code>cargo run -- lab-simulate scenarios/lab-drop.json</code><p>Bu arayüz otomasyon bağlantısıdır; uygulamada bir dil modeli veya doğal dil sohbeti yoktur.</p></details>
-  </main>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Yörünge — Mekanik araştırma alanı</title>
+    <link rel="stylesheet" href="/lab/style.css" />
+    <script type="module" src="/lab/dist/lab.js"></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="/">Yörünge<span>Sanal laboratuvar</span></a>
+      <nav aria-label="Laboratuvarlar">
+        <a href="/">Madde ve yaşam</a><span class="active-tab">3B mekanik</span
+        ><a href="/hucre">Hücre Ar-Ge</a><a href="/enerji">Isı ve elektrik</a><a href="/atis">Atış deneyi</a
+        ><button id="modules-button">Diğer fizik alanları</button>
+      </nav>
+      <div class="file-actions">
+        <button id="import-button">Deney aç</button
+        ><button id="save-button">Kaydet</button
+        ><input
+          id="scene-file"
+          type="file"
+          accept="application/json,.json"
+          hidden
+        />
+      </div>
+    </header>
+    <main>
+      <div class="intro">
+        <div>
+          <h1>Mekanik araştırma alanı</h1>
+          <p>
+            Deneyini tanımla, koşullarını değiştir ve hesaplanan hareketi
+            karşılaştır.
+          </p>
+        </div>
+        <span class="version">Katı cisim modeli · v0.5</span>
+      </div>
+      <div id="message" role="status" aria-live="polite">
+        Laboratuvar hazırlanıyor…
+      </div>
+      <div class="workspace">
+        <aside class="library" aria-label="Deney araçları">
+          <section class="experiment-identity">
+            <h2>Deney tanımı</h2>
+            <label
+              >Deney adı<input
+                id="experiment-name"
+                maxlength="120"
+                value="Yeni mekanik deneyi" /></label
+            ><label
+              >Hipotez / deney notu<textarea
+                id="experiment-notes"
+                rows="3"
+                maxlength="4000"
+                placeholder="Neyi değiştirecek, hangi sonucu inceleyeceksin?"
+              ></textarea>
+            </label>
+          </section>
+          <section>
+            <h2>Nesne ekle</h2>
+            <div class="shape-buttons">
+              <button data-add="sphere">
+                <span aria-hidden="true">●</span>Küre</button
+              ><button data-add="box">
+                <span aria-hidden="true">▣</span>Kutu</button
+              ><button data-add="cylinder">
+                <span aria-hidden="true">▥</span>Silindir
+              </button>
+            </div>
+            <p class="hint">Sahnede seç; renkli eksenlerden tutarak taşı.</p>
+          </section>
+          <details class="preset-section">
+            <summary>Örnek başlangıç düzenleri</summary>
+            <p class="hint">
+              Örnek seçmek mevcut kurulumu değiştirir. Önce deneyini
+              kaydedebilirsin.
+            </p>
+            <div id="presets" class="presets"></div>
+          </details>
+          <section>
+            <div class="section-row">
+              <h2>Sahnedeki nesneler</h2>
+              <span id="body-count">0</span>
+            </div>
+            <div id="body-list" class="body-list"></div>
+            <button class="subtle full" id="clear-button">
+              Boş deney oluştur
+            </button>
+          </section>
+          <section>
+            <h2>Ortam ve hesap</h2>
+            <label
+              >Yerçekimi <span>m/s², aşağı yön</span
+              ><input
+                id="gravity"
+                type="number"
+                min="-30"
+                max="30"
+                step="0.01"
+                value="9.81" /></label
+            ><label
+              >Zemin sürtünmesi<input
+                id="floor-friction"
+                type="number"
+                min="0"
+                max="2"
+                step="0.05"
+                value="0.7" /></label
+            ><label
+              >Zemin esnekliği <span>0–1</span
+              ><input
+                id="floor-restitution"
+                type="number"
+                min="0"
+                max="1"
+                step="0.05"
+                value="0.2" /></label
+            ><label
+              >Deney süresi <span>s</span
+              ><input
+                id="duration"
+                type="number"
+                min="0.1"
+                max="30"
+                step="0.1"
+                value="10" /></label
+            ><label
+              >Sonuç örnekleme<select id="sample-hz">
+                <option value="30">30 Hz</option>
+                <option value="60">60 Hz</option>
+              </select></label
+            >
+            <p class="hint">
+              Fizik adımı: <strong>1/120 s, sabit</strong>. Örnekleme hızı hesap
+              adımını değiştirmez.
+            </p>
+          </section>
+          <details class="spring-section">
+            <summary>Yay bağlantıları</summary>
+            <p class="hint">
+              İki nesnenin merkezini yayla bağla. Birini sabitleyerek asılı
+              sistem kurabilirsin.
+            </p>
+            <label>Birinci nesne<select id="spring-a"></select></label
+            ><label>İkinci nesne<select id="spring-b"></select></label
+            ><label
+              >Doğal uzunluk <span>m</span
+              ><input
+                id="spring-length"
+                type="number"
+                min="0.1"
+                max="20"
+                step="0.1"
+                value="1.5" /></label
+            ><label
+              >Yay sertliği <span>N/m</span
+              ><input
+                id="spring-stiffness"
+                type="number"
+                min="0.1"
+                max="500"
+                step="1"
+                value="40" /></label
+            ><label
+              >Sönüm <span>N·s/m</span
+              ><input
+                id="spring-damping"
+                type="number"
+                min="0"
+                max="50"
+                step="0.1"
+                value="2" /></label
+            ><button id="add-spring" class="full">Yayı bağla</button>
+            <div id="spring-list"></div>
+          </details>
+        </aside>
+        <section class="experiment" aria-label="3B deney alanı">
+          <div class="scene-toolbar">
+            <div class="mode-buttons">
+              <button
+                id="translate-button"
+                class="selected"
+                aria-pressed="true"
+              >
+                Taşı</button
+              ><button id="rotate-button" aria-pressed="false">Döndür</button>
+            </div>
+            <button id="camera-button">Kamerayı sıfırla</button
+            ><span id="mode-label" class="mode-label">Kurulum</span>
+          </div>
+          <div class="viewport-wrap">
+            <canvas
+              id="viewport"
+              aria-label="Nesneleri seçmek, taşımak ve deneyi izlemek için üç boyutlu sahne"
+            ></canvas>
+            <div id="canvas-error" hidden></div>
+            <div class="scene-guide">
+              Sol sürükle: kamerayı döndür · Sağ sürükle: kaydır · Tekerlek:
+              yakınlaş
+            </div>
+            <div class="scale-guide">Izgara: 1 m</div>
+          </div>
+          <div class="transport">
+            <button id="run-button" class="primary" disabled>Çalıştır</button
+            ><button id="step-button" disabled>Bir kare</button
+            ><button id="edit-button">Kuruluma dön</button
+            ><label class="speed-label"
+              >Oynatma<select id="playback-speed">
+                <option value="0.25">¼ hız</option>
+                <option value="0.5">½ hız</option>
+                <option value="1" selected>1× hız</option>
+                <option value="2">2× hız</option>
+              </select></label
+            ><output id="time-output">0,00 s</output>
+          </div>
+          <label class="timeline-label" for="timeline"
+            >Deney zamanı<input
+              type="range"
+              id="timeline"
+              min="0"
+              max="10"
+              step="0.001"
+              value="0"
+              disabled
+          /></label>
+          <div class="readouts">
+            <div>
+              <span>Seçili nesne</span><strong id="selected-label">—</strong>
+            </div>
+            <div>
+              <span>Yükseklik</span><strong id="readout-height">—</strong>
+            </div>
+            <div><span>Hız</span><strong id="readout-speed">—</strong></div>
+            <div>
+              <span>Konum (x, y, z)</span
+              ><strong id="readout-position">—</strong>
+            </div>
+          </div>
+          <div class="experiment-footer">
+            <p>Hesaplanan tüm cisimler ve zaman örnekleri.</p>
+            <div class="result-actions">
+              <button id="export-csv" disabled>CSV indir · SI</button
+              ><button id="export-result" disabled>Sonuç JSON</button>
+            </div>
+          </div>
+          <details class="analysis-panel" open>
+            <summary>Ölçümler ve zaman grafikleri</summary>
+            <p id="analysis-empty" class="hint">
+              Bir cisim ekle ve deneyi çalıştır. Seçili cismin konumu, hız
+              büyüklüğü ve ölçümleri burada görünür.
+            </p>
+            <div id="analysis-data" hidden>
+              <p id="run-provenance" class="hint"></p>
+              <dl id="run-metrics" class="run-metrics"></dl>
+              <p class="hint">
+                Yol ve en yüksek hız çıktı örneklerinden hesaplanır; örnekler
+                arasındaki hareket kaçabilir. Öteleme enerjisi dönme, yerçekimi
+                ve yay enerjisini içermez; toplam enerji veya korunum testi
+                değildir.
+              </p>
+              <div class="chart-controls">
+                <label
+                  >Konum ekseni<select id="chart-axis">
+                    <option value="0">X · m</option>
+                    <option value="1" selected>Y · m</option>
+                    <option value="2">Z · m</option>
+                  </select></label
+                ><button id="keep-run" disabled>Denemeyi deftere ekle</button>
+              </div>
+              <div id="chart-legend" class="chart-legend"></div>
+              <figure>
+                <figcaption>Konum / zaman</figcaption>
+                <svg
+                  id="position-chart"
+                  viewBox="0 0 720 215"
+                  role="img"
+                  aria-label="Seçili cismin konum zaman grafiği"
+                ></svg>
+              </figure>
+              <figure>
+                <figcaption>Hız büyüklüğü / zaman</figcaption>
+                <svg
+                  id="speed-chart"
+                  viewBox="0 0 720 215"
+                  role="img"
+                  aria-label="Seçili cismin hız büyüklüğü zaman grafiği"
+                ></svg>
+              </figure>
+            </div>
+          </details>
+        </section>
+        <aside class="inspector" aria-label="Nesne özellikleri">
+          <h2>Nesne özellikleri</h2>
+          <p id="no-selection" class="hint">
+            Sahneden veya listeden bir nesne seç.
+          </p>
+          <form id="body-form" hidden>
+            <p id="edit-hint" class="edit-hint" hidden>
+              Değişiklik yapmak için “Kuruluma dön” düğmesine bas.
+            </p>
+            <fieldset id="body-fields">
+              <label>Ad<input id="body-label" maxlength="80" /></label>
+              <label
+                >Malzeme hazır ayarı<select id="material">
+                  <option value="stone">Taş</option>
+                  <option value="wood">Ahşap</option>
+                  <option value="rubber">Kauçuk</option>
+                  <option value="steel">Çelik</option>
+                </select></label
+              >
+              <p class="hint">
+                Örnek sürtünme ve esneklik değerleri. Kütleyi ayrıca ayarla.
+              </p>
+              <label
+                >Kütle <span>g</span
+                ><input
+                  id="mass"
+                  type="number"
+                  min="10"
+                  max="1000000"
+                  step="10"
+              /></label>
+              <div class="triplet">
+                <label id="size-x-label"
+                  >En / çap <span>cm</span
+                  ><input
+                    id="size-x"
+                    type="number"
+                    min="10"
+                    max="1000"
+                    step="1" /></label
+                ><label
+                  >Boy <span>cm</span
+                  ><input
+                    id="size-y"
+                    type="number"
+                    min="10"
+                    max="1000"
+                    step="1" /></label
+                ><label
+                  >Derinlik <span>cm</span
+                  ><input
+                    id="size-z"
+                    type="number"
+                    min="10"
+                    max="1000"
+                    step="1"
+                /></label>
+              </div>
+              <label class="check"
+                ><input id="fixed" type="checkbox" />Yerine sabitle</label
+              >
+              <details open>
+                <summary>Konum <span>m</span></summary>
+                <div class="triplet">
+                  <label
+                    >X<input
+                      id="pos-x"
+                      type="number"
+                      min="-40"
+                      max="40"
+                      step="0.1" /></label
+                  ><label
+                    >Y<input
+                      id="pos-y"
+                      type="number"
+                      min="0"
+                      max="40"
+                      step="0.1" /></label
+                  ><label
+                    >Z<input
+                      id="pos-z"
+                      type="number"
+                      min="-40"
+                      max="40"
+                      step="0.1"
+                  /></label>
+                </div>
+              </details>
+              <details>
+                <summary>Dönüş <span>derece</span></summary>
+                <div class="triplet">
+                  <label
+                    >X<input
+                      id="rot-x"
+                      type="number"
+                      min="-360"
+                      max="360"
+                      step="5" /></label
+                  ><label
+                    >Y<input
+                      id="rot-y"
+                      type="number"
+                      min="-360"
+                      max="360"
+                      step="5" /></label
+                  ><label
+                    >Z<input
+                      id="rot-z"
+                      type="number"
+                      min="-360"
+                      max="360"
+                      step="5"
+                  /></label>
+                </div>
+              </details>
+              <details>
+                <summary>Başlangıç hızı <span>m/s</span></summary>
+                <div class="triplet">
+                  <label
+                    >X<input
+                      id="vel-x"
+                      type="number"
+                      min="-30"
+                      max="30"
+                      step="0.1" /></label
+                  ><label
+                    >Y<input
+                      id="vel-y"
+                      type="number"
+                      min="-30"
+                      max="30"
+                      step="0.1" /></label
+                  ><label
+                    >Z<input
+                      id="vel-z"
+                      type="number"
+                      min="-30"
+                      max="30"
+                      step="0.1"
+                  /></label>
+                </div>
+              </details>
+              <details>
+                <summary>Dönme hızı <span>rad/s</span></summary>
+                <div class="triplet">
+                  <label
+                    >X<input
+                      id="spin-x"
+                      type="number"
+                      min="-20"
+                      max="20"
+                      step="0.1" /></label
+                  ><label
+                    >Y<input
+                      id="spin-y"
+                      type="number"
+                      min="-20"
+                      max="20"
+                      step="0.1" /></label
+                  ><label
+                    >Z<input
+                      id="spin-z"
+                      type="number"
+                      min="-20"
+                      max="20"
+                      step="0.1"
+                  /></label>
+                </div>
+              </details>
+              <details>
+                <summary>Çarpışma özellikleri</summary>
+                <label
+                  >Sürtünme<input
+                    id="friction"
+                    type="number"
+                    min="0"
+                    max="2"
+                    step="0.05" /></label
+                ><label
+                  >Esneklik <span>0–1</span
+                  ><input
+                    id="restitution"
+                    type="number"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                /></label>
+                <p class="hint">
+                  Esneklik yükseldikçe çarpışmada daha fazla sekme oluşur. İki
+                  yüzeyin değerleri birlikte kullanılır.
+                </p>
+              </details>
+            </fieldset>
+            <div class="object-actions">
+              <button id="duplicate-button" type="button">Çoğalt</button
+              ><button id="delete-button" type="button" class="danger">
+                Nesneyi sil
+              </button>
+            </div>
+          </form>
+          <section class="mechanics-notebook">
+            <div class="section-row">
+              <h2>Deneme defteri</h2>
+              <span id="saved-run-count">0/3</span>
+            </div>
+            <p class="hint">
+              Bu oturumda en fazla 3 hesap sakla. Aynı cisim kimliği için güncel
+              hesabı en fazla 2 kayıtla karşılaştır. Kayıtlar sayfa kapanınca
+              silinir; girdileri ve sonuçları dosya olarak indir.
+            </p>
+            <div id="run-list"></div>
+          </section>
+          <details class="limits">
+            <summary>Modelin sınırları</summary>
+            <p>
+              Bu sürüm katı cisim mekaniği içindir. Nesneler şekil değiştirmez;
+              malzemeler yaklaşık hazır ayarlardır.
+            </p>
+            <p>
+              Akışkan, ısı, elektrik, kırılma ve hava direnci bu 3B motorda
+              henüz yok. Atış deneyinde ayrı bir hava direnci modeli bulunur.
+            </p>
+            <p>
+              Gerçek deneylerle doğrulanmış mühendislik hesabı değildir. Ölçek
+              ve başlangıçta çakışan nesneler sonucu etkiler.
+            </p>
+          </details>
+        </aside>
+      </div>
+      <details id="modules-panel" class="modules-panel">
+        <summary>Tek laboratuvar, farklı fizik alanları</summary>
+        <div id="module-list" class="module-list"></div>
+        <p>
+          Planlanan alanlar bu sürümde çalışmaz. Aynı sahne ve nesne düzeninin
+          üzerine, ayrı doğrulama testleriyle eklenecekler.
+        </p>
+      </details>
+      <details class="api-panel">
+        <summary>AI ile deney kurma</summary>
+        <p>
+          Kaydedilen proje JSON'undaki <code>scene</code> alanını aynı hesaplama
+          motoruna gönder. Eski ham sahne dosyaları da açılabilir. Çıktı bütün
+          nesnelerin zaman içindeki konumlarını ve hızlarını içerir.
+        </p>
+        <code>POST /api/lab/simulate</code
+        ><code>cargo run -- lab-simulate scenarios/lab-drop.json</code>
+        <p>
+          Bu arayüz otomasyon bağlantısıdır; uygulamada bir dil modeli veya
+          doğal dil sohbeti yoktur.
+        </p>
+      </details>
+    </main>
+  </body>
 </html>

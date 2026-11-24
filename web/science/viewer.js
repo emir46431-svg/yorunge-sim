@@ -1,5 +1,6 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { elements } from "./catalog.js";
 
 const COLORS = {
   H: 0xe8f2fa,
@@ -20,6 +21,12 @@ const RADII = {
   Si: 0.48,
 };
 const UP = new THREE.Vector3(0, 1, 0);
+const ELEMENT_COLORS = new Map(
+  elements.map((e) => [
+    e.symbol,
+    new THREE.Color().setHSL((e.atomic_number * 0.61803398875) % 1, 0.48, 0.61),
+  ]),
+);
 
 export function createScienceViewer(
   canvas,
@@ -36,7 +43,11 @@ export function createScienceViewer(
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.28;
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x122738);
+  scene.background = new THREE.Color(
+    document.documentElement.classList.contains("desktop-mode")
+      ? 0x25272b
+      : 0x122738,
+  );
   const camera = new THREE.PerspectiveCamera(39, 1, 0.05, 300);
   const orbit = new OrbitControls(camera, canvas);
   orbit.enableDamping = true;
@@ -128,13 +139,21 @@ export function createScienceViewer(
     return mesh;
   }
   function resetCamera() {
+    camera.near = Math.max(0.001, dimensions / 10000);
+    camera.far = Math.max(300, dimensions * 30);
+    orbit.minDistance = Math.max(0.1, dimensions / 100);
+    orbit.maxDistance = Math.max(70, dimensions * 12);
+    camera.updateProjectionMatrix();
     camera.position.set(dimensions * 0.9, dimensions * 0.6, dimensions * 1.8);
     orbit.target.set(0, 0, 0);
     camera.lookAt(orbit.target);
     orbit.update();
   }
-  function setGraph(data, { reset = false, dense = false } = {}) {
-    graph = { data, dense };
+  function setGraph(
+    data,
+    { reset = false, dense = false, structure = false } = {},
+  ) {
+    graph = { data, dense, structure };
     mode = "graph";
     disposeRoot();
     const box = new THREE.Box3();
@@ -159,7 +178,10 @@ export function createScienceViewer(
         (RADII[atom.element] || 0.45) *
         (dense ? 0.55 : 1) *
         (spacefill ? 1.55 : 1);
-      const mesh = sphere(radius, COLORS[atom.element] || 0xaabacd);
+      const mesh = sphere(
+        radius,
+        COLORS[atom.element] || ELEMENT_COLORS.get(atom.element) || 0xaabacd,
+      );
       mesh.position.copy(p);
       mesh.userData.atomId = atom.id;
       mesh.userData.radius = radius;
@@ -200,15 +222,20 @@ export function createScienceViewer(
           cylinder(x, y, dense ? 0x607c92 : 0x9eb8c9, dense ? 0.035 : 0.065);
         }
       });
+    camera.far = Math.max(300, dimensions * 30);
+    orbit.maxDistance = Math.max(70, dimensions * 12);
+    camera.updateProjectionMatrix();
     if (reset) resetCamera();
   }
   function select(ids) {
     selected = [...ids];
-    if (graph && mode === "graph") setGraph(graph.data, { dense: graph.dense });
+    if (graph && mode === "graph")
+      setGraph(graph.data, { dense: graph.dense, structure: graph.structure });
   }
   function setRepresentation(value) {
     spacefill = value;
-    if (graph && mode === "graph") setGraph(graph.data, { dense: graph.dense });
+    if (graph && mode === "graph")
+      setGraph(graph.data, { dense: graph.dense, structure: graph.structure });
   }
   function makeCell(id, index, count) {
     const group = new THREE.Group();

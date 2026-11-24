@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="tr" class="desktop-mode">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>Yörünge Studio</title>
+    <link rel="stylesheet" href="/science/style.css" />
+    <link rel="stylesheet" href="/studio/theme.css" />
+    <script type="module" src="/science/dist/science.js"></script>
+  </head>
+  <body class="studio-body">
+    <a class="skip" href="#workspace">Çalışma alanına geç</a>
+    <header class="studio-menubar">
+      <a
+        class="studio-brand"
+        href="/studio?alan=materials"
+        aria-label="Yörünge Studio, malzemeler"
+      >
+        <span class="studio-mark" aria-hidden="true">◉</span>
+        Yörünge <strong>Studio</strong>
+      </a>
+      <div class="file-tools" aria-label="Deney dosyası">
+        <button id="import" title="Kaydedilmiş bir deney dosyasını aç">
+          Deney aç
+        </button>
+        <button id="save" title="Çalışma alanını JSON dosyası olarak kaydet">
+          Kaydet
+        </button>
+        <button id="export-result" disabled>Sonucu dışa aktar</button>
+        <input type="file" id="file" accept="application/json,.json" hidden />
+      </div>
+      <span class="studio-version">v0.5</span>
+    </header>
+    <div class="navigation studio-workspaces">
+      <nav aria-label="Çalışma alanları">
+        <button data-mode="materials" aria-current="page">Malzemeler</button>
+        <button data-mode="molecules">Moleküller</button>
+        <button data-mode="elements">Elementler <span>118</span></button>
+        <button data-mode="cells">Hücre ve zar</button>
+        <a href="/hucre">Hücre Ar-Ge</a>
+        <a href="/arge?studio=1">Enzim Ar-Ge</a>
+        <a href="/mekanik?studio=1">Mekanik</a>
+        <a href="/enerji">Isı ve elektrik</a>
+      </nav>
+      <span class="studio-workspace-label">Çalışma alanları</span>
+    </div>
+    <main class="studio-main">
+      <div id="workspace" class="workspace" tabindex="-1">
+        <aside
+          id="library"
+          class="library"
+          aria-label="Araçlar ve yapı kütüphanesi"
+        ></aside>
+        <section class="stage-column" aria-label="Sahne ve deney sonuçları">
+          <div id="scene-panel" class="scene-panel">
+            <div class="scene-top">
+              <span id="scene-title">Grafen</span>
+              <div>
+                <button id="representation" aria-pressed="false">
+                  Küre–çubuk
+                </button>
+                <button id="reset-camera">Görünümü sıfırla</button>
+              </div>
+            </div>
+            <div class="canvas-wrap">
+              <canvas
+                id="science-viewport"
+                aria-label="Etkileşimli üç boyutlu deney görünümü"
+              ></canvas>
+              <div id="viewport-error" role="alert" hidden></div>
+              <div class="scene-caption" id="scene-caption">
+                Döndür: sürükle · Yakınlaş: tekerlek
+              </div>
+              <div id="scene-legend" class="scene-legend"></div>
+            </div>
+            <div
+              id="stage-controls"
+              class="stage-controls"
+              aria-label="Deney kontrolleri"
+            ></div>
+            <div
+              id="metrics"
+              class="metrics"
+              aria-label="Sahne sonuçları"
+            ></div>
+          </div>
+          <div id="periodic-panel" class="periodic-panel" hidden></div>
+          <div id="below-stage" class="below-stage"></div>
+        </section>
+        <aside
+          id="inspector"
+          class="inspector"
+          aria-label="Özellikler ve sonuçlar"
+        ></aside>
+      </div>
+      <details class="model-details studio-details">
+        <summary>Çalışma alanı bilgisi, model ve kaynaklar</summary>
+        <div class="studio-context">
+          <h1 id="page-title">Malzeme çalışma alanı</h1>
+          <p id="page-description">
+            Atomların düzenini üç boyutlu sahnede incele.
+          </p>
+        </div>
+        <div id="model-details"></div>
+      </details>
+    </main>
+    <footer class="studio-statusbar">
+      <span id="notice" role="status" aria-live="polite"
+        >Çalışma alanı hazırlanıyor…</span
+      >
+      <span class="model-tag" id="model-tag">Kristal yapı gösterimi</span>
+      <span class="studio-local">Yerel çalışma alanı</span>
+    </footer>
+  </body>
+</html>

@@ -1,5 +1,20 @@
 # Doğrulama kaydı
 
+## v0.5 Studio
+
+24 Kasım 2026, Windows x64. **69 Rust + 50 Node + 3 Rust/JavaScript sözleşme testi = 122 otomatik test** geçti. Rust biçim kontrolü, tüm hedefler için Clippy (`-D warnings`), dört arayüz paketi ve release derlemesi tamamlandı.
+
+- Yeni testler: 118 elementli serbest yapı doğrulaması, 1000 atom sınırı, XYZ sayı/satır/boyut kontrolleri ve gidiş dönüş, SC/BCC/FCC sayıları, Å mesafe/ölçek; hücre zarfı/tarama/CSV/korunum sözleşmeleri; mekanik SI ölçümleri ve CSV güvenliği.
+- DC devresinde seri, paralel, dengeli köprü, ters gerilim, sıfır gerilim, açık dal, yüzen ağ ve geçersiz girdiler test edildi. Isı hesabı yalıtılmış enerji artışı, analitik soğuma, denge, sıfıra yakın taşınım ve enerji dengesiyle karşılaştırıldı.
+- Isı ve devre release CLI sonuçları HTTP JSON ile birebir aynı. Geçersiz girdi 400, yabancı Origin 403 verdi; dokuz Studio/API/varlık yolu 200 döndürdü.
+- Arayüzde Au ve Si atomları eklendi, 2,5 Å mesafe okundu; geri al/yinele ve sekme geçişleri denendi. 108 atomlu Cu/FCC geometrisi oluşturulup sayfa yenilenince korundu.
+- Hücre çalışma alanında bir özel koşul ve üç koşullu tarama çalıştırıldı, dört eğri seçildi. Süre 60 s yapıldığında ilk çalıştırmada 301 örnek/60 s kullanıldı. Beş kayıt yeniden açılışta girdilerden hesaplandı. API sınır durumları bölünme, sıfır çözünen, erken durma ve 3002 kare ile ayrıca denetlendi.
+- Mekanikte ilk tıklamada alanların hesap girdisine geçmesi düzeltildi: 2 kg ve 2 s birlikte girildiğinde sonuçta 2 kg, 2 s, 61 örnek görüldü. Yerçekimi 9,81 ve 3 m/s² koşulları defterde karşılaştırıldı; güncel ve kayıtlı eğriler birlikte gösterildi.
+- 12 V / 100 Ω devresi 0,12 A ve 1,44 W verdi. Güç ısıya aktarıldı; 600 s için 20,701 °C, 60 s için 20,093 °C görüldü. Girdi düzenlenince eski sonuç/CSV temizlendi. Hesap sürerken güç aktarımı kilitlendi. Grafik ekseninin dolgu hatası giderildi.
+- Native Windows host uyarısız derlendi. Microsoft WebView2 SDK imzaları doğrulandı. PID sahipliği ve Job Object kapanışı test edildi. Ayrı Yörünge Studio penceresi, yerel JSON kaydetme diyaloğu ve pencere kapanınca kendi 17971 portunun boşalması görüldü. Harici tarayıcı başlatan kısayolun yerini `Yorunge.exe` alır.
+
+Bu kayıt gerçek malzeme/enzim/hücre kalibrasyonu veya tüm Windows sürümleri için uyumluluk iddiası değildir. Atom editörü geometriktir; DC ve ısı arasında yalnız açık, sabit güç aktarımı vardır. Opus incelemesi tamamlanmış değildir; önceki OAuth hatası aşağıda kayıtlıdır.
+
 ## v0.4
 
 24 Kasım 2026, Windows x64. **63 Rust testi + 23 Node testi + 3 Rust/JavaScript sözleşme testi = 89 otomatik test** geçti. `cargo fmt -- --check`, `cargo clippy --offline --all-targets -- -D warnings`, arayüz paketlemesi ve release derlemesi tamamlandı. Sözleşme testleri debug ve release CLI ile çalıştırıldı.

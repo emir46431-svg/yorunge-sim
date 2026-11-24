@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Hücre Deneyleri · Yörünge Studio</title>
+    <link rel="stylesheet" href="/assets/cell-workbench.css" />
+    <script type="module" src="/assets/cell-workbench.js"></script>
+  </head>
+  <body>
+    <header class="appbar">
+      <a class="brand" href="/studio?alan=materials"
+        ><span class="brand-mark">Y</span> YÖRÜNGE <span>STUDIO</span></a
+      >
+      <nav aria-label="Çalışma alanları">
+        <a href="/studio?alan=materials">Malzemeler</a
+        ><a href="/arge?studio=1">Enzim / Ar-Ge</a
+        ><a href="/mekanik?studio=1">Mekanik</a
+        ><a href="/hucre" aria-current="page">Hücre deneyleri</a><a href="/enerji">Isı ve elektrik</a>
+      </nav>
+      <span class="engine">RUST · YEREL</span>
+    </header>
+    <div class="toolbar">
+      <div class="workspace-title">
+        <span class="eyebrow">DENEY ÇALIŞMA ALANI</span>
+        <h1>Hücre taşınımı</h1>
+      </div>
+      <div class="toolbar-actions">
+        <button id="new-project" type="button">Yeni proje</button
+        ><button id="import-project" type="button">Proje aç</button
+        ><button id="export-project" type="button">JSON kaydet</button
+        ><button id="export-csv" type="button" disabled>Sonuç CSV</button>
+      </div>
+      <input
+        id="project-file"
+        type="file"
+        accept="application/json,.json"
+        hidden
+      />
+    </div>
+    <main class="workspace">
+      <aside class="left-panel panel" aria-label="Deney girdileri">
+        <form id="experiment-form">
+          <section class="panel-section">
+            <h2><span>01</span> Deney tanımı</h2>
+            <label class="field"
+              >Deney adı<input
+                id="project-name"
+                maxlength="120"
+                required
+                value="Yeni hücre deneyi" /></label
+            ><label class="field"
+              >Hipotez<textarea
+                id="project-hypothesis"
+                maxlength="2000"
+                rows="2"
+                placeholder="Değişken ve beklenen yön…"
+              ></textarea>
+            </label>
+          </section>
+          <section class="panel-section">
+            <h2><span>02</span> Başlangıç koşulları</h2>
+            <div id="initial-fields"></div>
+          </section>
+          <section class="panel-section">
+            <h2><span>03</span> Taşınım ve zaman</h2>
+            <div id="transport-fields"></div>
+            <label class="check-field"
+              ><input id="division-enabled" type="checkbox" /> Geometrik ikiye
+              bölme</label
+            ><label class="field division-field"
+              >Bölme zamanı <span class="unit">s</span
+              ><input
+                id="division-time"
+                type="number"
+                step="any"
+                value="30"
+                min="0"
+                disabled
+            /></label>
+            <p class="hint">Hacim ve çözünen iki eşit bölmeye paylaştırılır.</p>
+          </section>
+          <div class="run-controls">
+            <button class="primary" id="run-single" type="submit">
+              ▶ Çalıştır ve kaydet</button
+            ><span id="draft-status">Girdiler çalıştırılmaya hazır.</span>
+          </div>
+        </form>
+        <section class="panel-section scan-section">
+          <h2><span>04</span> Koşul taraması</h2>
+          <label class="field"
+            >Değiştirilecek parametre<select
+              id="scan-parameter"
+            ></select></label
+          ><label class="field"
+            >Değerler<input
+              id="scan-values"
+              value="100; 150; 300"
+              maxlength="512"
+          /></label>
+          <p class="hint">
+            2–6 değer; ayırıcı <b>;</b> · Diğer girdiler sabit tutulur.
+          </p>
+          <button id="run-scan" type="button" class="full">
+            Taramayı çalıştır
+          </button>
+        </section>
+        <details class="panel-section presets">
+          <summary>Parametre şablonları</summary>
+          <p class="hint">Yalnız girdileri doldurur. Kayıt oluşturmaz.</p>
+          <div id="presets">
+            <span class="hint">Şablonlar yükleniyor…</span>
+          </div>
+        </details>
+      </aside>
+      <section class="center-panel" aria-label="Sonuçlar ve deney defteri">
+        <div class="results-header">
+          <div>
+            <span class="eyebrow">SONUÇ GÖRÜNÜMÜ</span>
+            <h2 id="result-title">Çalışma seçilmedi</h2>
+          </div>
+          <span id="compare-count" class="tag">0 / 4 karşılaştırma</span>
+        </div>
+        <div class="results-scroll">
+          <div id="empty-state" class="empty-state">
+            <div class="pool-mark" aria-hidden="true">○ ⇄ ◯</div>
+            <h3>Deneyi tanımlayın, sonuçları karşılaştırın.</h3>
+            <p>
+              Soldaki girdilerle bir çalışma veya koşul taraması başlatın.
+              Hesaplanan eğriler ve izlenebilir kayıtlar burada görünür.
+            </p>
+            <span class="tag">Sonlu iç / dış bölme · pasif taşınım</span>
+          </div>
+          <div id="computed-results" hidden>
+            <div id="metrics" class="metrics"></div>
+            <div class="plot-card">
+              <div class="plot-title">
+                <h3>Toplam iç hacim</h3>
+                <span>pL</span>
+              </div>
+              <div id="volume-chart"></div>
+            </div>
+            <div class="plot-card">
+              <div class="plot-title">
+                <h3>Çözünen derişimi</h3>
+                <span>mM</span>
+              </div>
+              <div id="concentration-chart"></div>
+              <p class="chart-note">
+                Düz çizgi: iç bölmelerin hacim ağırlıklı derişimi · Kesik: dış
+                ortam
+              </p>
+            </div>
+            <div id="legend" class="legend"></div>
+            <section class="sample-panel">
+              <div class="sample-heading">
+                <h3>Seçili çalışmanın örnekleri</h3>
+                <output id="sample-time"></output>
+              </div>
+              <input
+                id="sample-index"
+                type="range"
+                min="0"
+                max="0"
+                step="1"
+                value="0"
+                aria-label="Hesaplanan zaman örneği"
+              />
+              <div class="table-scroll">
+                <table class="sample-table">
+                  <thead>
+                    <tr>
+                      <th>Bölme</th>
+                      <th>Hacim <small>pL</small></th>
+                      <th>Çözünen <small>fmol</small></th>
+                      <th>Derişim <small>mM</small></th>
+                    </tr>
+                  </thead>
+                  <tbody id="sample-rows"></tbody>
+                </table>
+              </div>
+            </section>
+          </div>
+        </div>
+        <section class="notebook">
+          <div class="notebook-header">
+            <h2>Deney defteri <span id="notebook-count">0 / 12</span></h2>
+            <span class="hint"
+              >☑ Eğrileri karşılaştır · Satıra tıkla: incele</span
+            >
+          </div>
+          <div class="notebook-scroll">
+            <table class="run-table">
+              <thead>
+                <tr>
+                  <th aria-label="Karşılaştır">K.</th>
+                  <th>Çalışma / koşul</th>
+                  <th>Durum</th>
+                  <th>Son t <small>s</small></th>
+                  <th aria-label="Sil"></th>
+                </tr>
+              </thead>
+              <tbody id="run-rows"></tbody>
+            </table>
+            <p id="notebook-empty" class="hint notebook-empty">
+              Henüz kayıt yok. Her çalışma girdileri ve kayıt zamanı ile
+              saklanır.
+            </p>
+          </div>
+        </section>
+      </section>
+      <aside class="right-panel panel" aria-label="Kayıt ve model bilgileri">
+        <section class="panel-section">
+          <h2>Seçili çalışma</h2>
+          <div id="run-inspector">
+            <p class="hint">Kayıt ayrıntıları çalışma sonrası görünür.</p>
+          </div>
+        </section>
+        <section class="panel-section">
+          <h2>Deney notları</h2>
+          <label class="field"
+            ><span class="sr-only">Deney notları</span
+            ><textarea
+              id="project-notes"
+              maxlength="10000"
+              rows="5"
+              placeholder="Gözlem, yorum ve sonraki adım…"
+            ></textarea>
+          </label>
+          <p class="hint">Proje bilgileri bu cihazda otomatik saklanır.</p>
+        </section>
+        <section class="panel-section model-scope">
+          <h2>Model kapsamı</h2>
+          <span class="tag">PASİF TAŞINIM · İKİ SONLU HAVUZ</span>
+          <p>
+            İyi karışmış bölmeler arasında su ve tek ideal yüksüz çözünen
+            taşınımı. Toplam hacim ve çözünen miktarı korunur.
+          </p>
+          <p>
+            Katsayılar kullanıcı girdisidir; belirli bir hücreye kalibre
+            edilmemiştir. Metabolizma, aktif pompalar, DNA, mitoz ve canlılık
+            hesaplanmaz.
+          </p>
+          <details>
+            <summary>Sayısal sınırlar</summary>
+            <p>
+              Toplam iç hacim başlangıcın %20–%200 aralığında, dış hacim
+              başlangıcın en az %5'i olmalıdır. Sınıra erişilirse eğri son
+              hesaplanan anda durur. Bunlar biyolojik eşikler değildir.
+            </p>
+            <p>
+              Hesap: Rust /api/cells/simulate. API çözücü sürümü bildirmez; içe
+              aktarılan girdiler mevcut çözücü ile yeniden hesaplanır.
+            </p>
+          </details>
+        </section>
+      </aside>
+    </main>
+    <footer class="statusbar">
+      <span class="status-dot"></span
+      ><span id="status" role="status" aria-live="polite"
+        >Çalışma alanı hazırlanıyor…</span
+      ><span id="save-status">YEREL PROJE</span>
+    </footer>
+  </body>
+</html>

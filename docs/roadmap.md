@@ -2,7 +2,9 @@
 
 Amaç, insanlara ve AI araçlarına tekrar üretilebilir deneyler kurabilecekleri sade bir ortam sunmak. Kullanıcı formül ezberlemek zorunda kalmaz; seçilen modelin varsayımlarını görebilir. Farklı doğruluk ve hesap maliyetlerini tek bir görünmez “gerçek dünya” düğmesine saklamamak gerekir.
 
-## Çalışan temel: v0.4
+## Çalışan temel: v0.5
+
+Windows Studio penceresi, 118 elementle özel atom dizilimi/XYZ, hücre tarama defteri, mekanik zaman serileri/CSV, ideal DC direnç ağı ve tek sıcaklıklı ısıl kapasite modeli eklendi. DC gücü ısı modeline tek yönlü aktarılabilir; sıcaklık dirence geri beslenmez. Özel atom dizilimi enerji veya kararlılık hesabı değildir.
 
 Enzim kinetiği için araştırma alanı: beş inhibisyon seçeneği, sınırlı parametre taraması, dört eğri karşılaştırma, hipotez/not defteri ve ölçüm CSV'siyle hata karşılaştırması. Proje JSON'u açıldığında girdilerden yeniden hesaplanır. Bu, ölçümle doğrulama iş akışının başlangıcıdır; otomatik parametre uydurma, hücre metabolizmasına bağlanma ve gerçek enzim kalibrasyonu henüz yoktur.
 
@@ -17,11 +19,11 @@ Yeni alanların sonraki adımları: molekül geometrisi için açık kapsamlı k
 1. **Mekanik çalışma alanını geliştirmek:** menteşeler, ipler, makaralar, dış kuvvet araçları, temas ölçümleri ve ölçüm grafiklerini eklemek. Hazır deneylerin beklenen sonuçlarını belgelemek. İlk kez kullananlarla arayüzü denemek.
 2. **Ölçüm ve belirsizlik:** gerçek deneyden zaman/konum CSV'si yükleme; ölçüm hatalarını gösterme; kalibrasyon ve ayrı doğrulama verisini ayırma. Girdi aralıklarına göre sonuç aralıkları çıkarma.
 3. **Akışkanlar:** önce basit kaldırma kuvveti ve sürükleme; sonra çözünürlüğü ve maliyeti açık sıvı/gaz modelleri. “Su görünen animasyon” ile fizik çözümünü ayırma.
-4. **Isı:** ısı kapasitesi, iletim ve ortamla ısı alışverişi. Malzeme özelliklerinin sıcaklığa bağlılığı ve model sınırları.
-5. **Elektrik, manyetizma ve dalgalar:** önce basit devreler ve dalga deneyleri; alan çözümleri daha sonra. Mekanikle bağlandığında enerji aktarımını açık tanımlama.
+4. **Isı:** mevcut tek sıcaklık modeline ek uzaysal iletim, ışınım, faz değişimi ve sıcaklığa bağlı malzeme özellikleri.
+5. **Elektrik, manyetizma ve dalgalar:** mevcut ideal DC ağdan sonra AC, kondansatör/bobin ve alan çözümleri. Mekanikle bağlandığında enerji aktarımını açık tanımlama.
 6. **Birleşik deneyler:** örneğin motordan mekanik harekete, sürtünmeden ısıya aktarım. Birimler, zaman adımları, enerji hesabı ve modüller arası veri sözleşmesi doğrulanmalı.
 
-Bu maddeler planlanan işlerdir; mevcut kodda çalışır modüller veya bir eklenti yükleme sistemi değildir. Özellikle akışkan/ısı/elektrik hesapları henüz uygulanmamıştır.
+Bu maddeler sonraki işlerdir; mevcut sınırlı DC/ısıl modellerin ötesindeki özellikler veya bir eklenti yükleme sistemi değildir. Akışkan hesabı henüz uygulanmamıştır.
 
 ## Basitlik ilkeleri
 

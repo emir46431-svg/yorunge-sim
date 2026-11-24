@@ -1,6 +1,17 @@
 import { createScienceViewer } from "./viewer.js";
 import { elements, categories, periodicTableSource } from "./catalog.js";
 import { materialPresets, buildMaterial } from "./materials.js";
+import {
+  STRUCTURE_LIMITS,
+  emptyStructure,
+  validateStructure,
+  nextAtomId,
+  parseXYZ,
+  writeXYZ,
+  createLattice,
+  scalePreset,
+  structureSummary,
+} from "./structures.js";
 
 const $ = (id) => document.getElementById(id),
   clone = (value) => structuredClone(value);
@@ -9,6 +20,8 @@ const fmt = (n, d = 2) =>
 const subscript = (s) =>
   String(s).replace(/\d/g, (d) => "₀₁₂₃₄₅₆₇₈₉"[Number(d)]);
 const names = { H: "Hidrojen", C: "Karbon", N: "Azot", O: "Oksijen" };
+const requestedMode = new URLSearchParams(location.search).get("alan");
+const desktopMode = document.documentElement.classList.contains("desktop-mode");
 const modeInfo = {
   molecules: [
     "Atomlardan yapıya.",
@@ -21,9 +34,9 @@ const modeInfo = {
     "Element kataloğu",
   ],
   materials: [
-    "Aynı atom, farklı madde.",
-    "Grafenden elmasa, atomların düzeni malzemenin yapısını değiştirir.",
-    "Kristal yapı gösterimi",
+    "Atomik yapı çalışma alanı",
+    "118 elementle atom koordinatlarını düzenle, örgü kur ve yapı dosyalarıyla çalış.",
+    "Atom koordinatları ve kristal yapılar",
   ],
   cells: [
     "Hücrenin sınırında.",
@@ -32,7 +45,7 @@ const modeInfo = {
   ],
 };
 const state = {
-  mode: "molecules",
+  mode: desktopMode ? "materials" : "molecules",
   busy: false,
   epoch: 0,
   mol: null,
@@ -51,6 +64,16 @@ const state = {
   layers: 3,
   spacing: 1,
   materialGraph: null,
+  structure: emptyStructure(),
+  structureActive: false,
+  structureSelected: [],
+  structureUndo: [],
+  structureRedo: [],
+  structurePage: 0,
+  structureQuery: "",
+  structureElement: "C",
+  structurePosition: [0, 0, 0],
+  latticeDraft: { kind: "sc", element: "C", a: 3, repeats: [3, 3, 3] },
   element: 6,
   spacefill: false,
 };
@@ -148,8 +171,12 @@ function persist() {
 function envelope() {
   return {
     format: "yorunge-science",
-    version: 1,
+    version: 2,
     mode: state.mode,
+    structure_workspace: {
+      document: state.structure,
+      active: state.structureActive,
+    },
     ...(state.mode === "molecules"
       ? { scene: state.mol }
       : state.mode === "cells"
@@ -174,6 +201,10 @@ function renderMode({ reset = true } = {}) {
     else b.removeAttribute("aria-current");
   });
   $("workspace").classList.toggle("periodic-mode", state.mode === "elements");
+  $("workspace").classList.toggle(
+    "structure-workspace",
+    state.mode === "materials",
+  );
   $("scene-panel").hidden = state.mode === "elements";
   $("periodic-panel").hidden = state.mode !== "elements";
   $("below-stage").replaceChildren();
@@ -185,6 +216,13 @@ function renderMode({ reset = true } = {}) {
   else if (state.mode === "elements") renderElements();
   else if (state.mode === "materials") renderMaterials(reset);
   else renderCells(reset);
+  const url = new URL(location.href);
+  if (desktopMode) {
+    url.pathname = "/studio";
+    url.searchParams.delete("studio");
+  }
+  url.searchParams.set("alan", state.mode);
+  history.replaceState(null, "", url);
   persist();
 }
 async function switchMode(mode) {
@@ -245,6 +283,10 @@ async function addAtom(element) {
   await applyMolecule(scene, { message: `${names[element]} atomu eklendi.` });
 }
 function selectAtom(id) {
+  if (state.mode === "materials" && state.structureActive) {
+    selectStructureAtom(id);
+    return;
+  }
   if (state.mode !== "molecules" || state.busy) return;
   state.selected = state.selected.includes(id)
     ? state.selected.filter((x) => x !== id)
@@ -825,7 +867,672 @@ function updateMaterialGeometry(reset = false) {
     ["Yapı", material.formula],
   ]);
 }
+function structureElementSelect(id, value, onChange) {
+  const select = el(
+    "select",
+    {
+      id,
+      "aria-label": "Element",
+      onChange: (event) => onChange?.(event.target.value),
+    },
+    elements.map((element) =>
+      el("option", {
+        value: element.symbol,
+        text: `${element.atomic_number} · ${element.symbol} — ${element.name}`,
+      }),
+    ),
+  );
+  select.value = value;
+  return select;
+}
+function structureNumber(label, id, value, min, max, onChange, step = "any") {
+  const input = el("input", {
+    id,
+    type: "number",
+    min,
+    max,
+    step,
+    required: true,
+    value,
+  });
+  if (onChange)
+    input.addEventListener("input", () =>
+      onChange(input.value === "" ? NaN : Number(input.value)),
+    );
+  return el("label", { class: "field" }, [label, input]);
+}
+function structureCoordinates(prefix, position, onChange) {
+  return el(
+    "div",
+    { class: "structure-coordinates" },
+    ["X", "Y", "Z"].map((axis, index) =>
+      structureNumber(
+        `${axis} (Å)`,
+        `${prefix}-${axis.toLowerCase()}`,
+        position[index],
+        -STRUCTURE_LIMITS.coordinate,
+        STRUCTURE_LIMITS.coordinate,
+        (value) => onChange(index, value),
+      ),
+    ),
+  );
+}
+function commitStructure(
+  document,
+  {
+    reset = false,
+    selected = state.structureSelected,
+    message = "Atomik yapı güncellendi.",
+  } = {},
+) {
+  const validated = validateStructure(document);
+  if (JSON.stringify(validated) !== JSON.stringify(state.structure)) {
+    state.structureUndo.push({
+      document: clone(state.structure),
+      selected: [...state.structureSelected],
+    });
+    state.structureUndo = state.structureUndo.slice(-STRUCTURE_LIMITS.history);
+    state.structureRedo = [];
+  }
+  state.structure = validated;
+  state.structureActive = true;
+  state.structureSelected = selected
+    .filter((id) => validated.atoms.some((atom) => atom.id === id))
+    .slice(-2);
+  renderMaterials(reset);
+  persist();
+  notify(message);
+}
+function structureHistory(from, to) {
+  if (!state[from].length) return;
+  state[to].push({
+    document: clone(state.structure),
+    selected: [...state.structureSelected],
+  });
+  const previous = state[from].pop();
+  state.structure = previous.document;
+  state.structureSelected = previous.selected;
+  state.structureActive = true;
+  renderMaterials(true);
+  persist();
+  notify("Yapı düzenlemesi geri yüklendi.");
+}
+function selectStructureAtom(id) {
+  if (state.busy || !state.structure.atoms.some((atom) => atom.id === id))
+    return;
+  state.structureSelected = state.structureSelected.includes(id)
+    ? state.structureSelected.filter((selected) => selected !== id)
+    : [...state.structureSelected.slice(-1), id];
+  viewer?.select(state.structureSelected);
+  renderStructureInspector();
+  renderStructureSummary();
+}
+function downloadXYZ() {
+  const content = writeXYZ(state.structure);
+  const url = URL.createObjectURL(
+    new Blob([content], { type: "chemical/x-xyz;charset=utf-8" }),
+  );
+  el("a", { href: url, download: "yorunge-yapi.xyz" }).click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  notify("XYZ dosyası Å koordinatlarıyla indirildi.");
+}
 function renderMaterials(reset) {
+  $("workspace").classList.add("structure-workspace");
+  if (state.structureActive) {
+    renderStructureEditor(reset);
+    return;
+  }
+  $("representation").hidden = false;
+  renderPresetMaterial(reset);
+  $("library").prepend(
+    section("Yapı düzenleme", [
+      button(
+        state.structure.atoms.length
+          ? `Özel yapıya dön (${state.structure.atoms.length} atom)`
+          : "Özel yapı düzenle",
+        () => {
+          state.structureActive = true;
+          renderMaterials(true);
+          persist();
+        },
+        "full primary",
+      ),
+      button(
+        "Boş yapı oluştur",
+        () =>
+          commitStructure(emptyStructure(), {
+            reset: true,
+            selected: [],
+            message: "Boş yapı açıldı. Element seçip atom ekleyebilirsin.",
+          }),
+        "full",
+      ),
+      hint("118 element · Serbest Å koordinatları · XYZ dosyaları"),
+    ]),
+  );
+  const scale = structureNumber(
+    "Ölçek (Å / gösterim birimi)",
+    "structure-preset-scale",
+    "",
+    0.001,
+    1000,
+  );
+  const form = el("form", { class: "structure-preset-copy" }, [
+    scale,
+    el("button", { type: "submit", class: "full", text: "Ölçekle ve düzenle" }),
+    hint(
+      "Bu hazır yapı birimsizdir. Girdiğin ölçek bütün koordinatlara uygulanır; bağlantı çizgileri aktarılmaz.",
+    ),
+  ]);
+  form.addEventListener(
+    "submit",
+    safe((event) => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const name = materialPresets.find(
+        (material) => material.id === state.material,
+      ).name;
+      commitStructure(
+        scalePreset(
+          state.materialGraph,
+          Number($("structure-preset-scale").value),
+          name,
+        ),
+        {
+          reset: true,
+          selected: [],
+          message: "Hazır yapı belirttiğin Å/birim ölçeğiyle kopyalandı.",
+        },
+      );
+    }),
+  );
+  $("library").append(section("Hazır yapıyı kopyala", [form]));
+}
+function renderStructureEditor(reset) {
+  $("scene-title").textContent = state.structure.name || "Özel yapı";
+  $("scene-caption").textContent =
+    "Koordinatlar: Å · Küreler atom işaretçisidir · Döndür: sürükle";
+  $("scene-legend").replaceChildren();
+  $("representation").hidden = true;
+  state.materialGraph = { atoms: state.structure.atoms, bonds: [] };
+  viewer?.setGraph(state.materialGraph, {
+    reset,
+    dense: true,
+    structure: true,
+  });
+  viewer?.select(state.structureSelected);
+  const name = el("input", {
+    id: "structure-name",
+    maxLength: 120,
+    value: state.structure.name,
+    "aria-label": "Yapı adı",
+    onChange: safe((event) => {
+      commitStructure({ ...state.structure, name: event.target.value });
+    }),
+  });
+  const atomForm = el("form", { id: "structure-add-form" }, [
+    el("label", { class: "field" }, [
+      "Element · 118",
+      structureElementSelect(
+        "structure-add-element",
+        state.structureElement,
+        (value) => {
+          state.structureElement = value;
+        },
+      ),
+    ]),
+    structureCoordinates(
+      "structure-add",
+      state.structurePosition,
+      (axis, value) => {
+        state.structurePosition[axis] = value;
+      },
+    ),
+    el("button", {
+      type: "submit",
+      class: "full primary",
+      text: "Atom ekle",
+      disabled: state.structure.atoms.length >= STRUCTURE_LIMITS.atoms,
+    }),
+  ]);
+  atomForm.addEventListener(
+    "submit",
+    safe((event) => {
+      event.preventDefault();
+      if (!atomForm.reportValidity()) return;
+      const id = nextAtomId(state.structure.atoms);
+      commitStructure(
+        {
+          ...state.structure,
+          atoms: [
+            ...state.structure.atoms,
+            {
+              id,
+              element: state.structureElement,
+              position: [...state.structurePosition],
+            },
+          ],
+        },
+        {
+          selected: [id],
+          message: `${state.structureElement} atomu eklendi. Konumlar Å biriminde.`,
+        },
+      );
+    }),
+  );
+  const lattice = state.latticeDraft;
+  const latticeKind = el(
+    "select",
+    {
+      id: "structure-lattice-kind",
+      onChange: (event) => {
+        lattice.kind = event.target.value;
+      },
+    },
+    [
+      el("option", { value: "sc", text: "SC · Basit kübik" }),
+      el("option", { value: "bcc", text: "BCC · Hacim merkezli kübik" }),
+      el("option", { value: "fcc", text: "FCC · Yüzey merkezli kübik" }),
+    ],
+  );
+  latticeKind.value = lattice.kind;
+  const latticeForm = el("form", { id: "structure-lattice-form" }, [
+    el("label", { class: "field" }, ["Örgü türü", latticeKind]),
+    el("label", { class: "field" }, [
+      "Element",
+      structureElementSelect(
+        "structure-lattice-element",
+        lattice.element,
+        (value) => {
+          lattice.element = value;
+        },
+      ),
+    ]),
+    structureNumber(
+      "Örgü sabiti a (Å)",
+      "structure-lattice-a",
+      lattice.a,
+      0.1,
+      1000,
+      (value) => {
+        lattice.a = value;
+      },
+    ),
+    el(
+      "div",
+      { class: "structure-coordinates" },
+      ["X", "Y", "Z"].map((axis, index) =>
+        structureNumber(
+          `${axis} tekrar`,
+          `structure-repeat-${index}`,
+          lattice.repeats[index],
+          1,
+          30,
+          (value) => {
+            lattice.repeats[index] = value;
+          },
+          1,
+        ),
+      ),
+    ),
+    el("button", {
+      type: "submit",
+      class: "full",
+      text: "Yapıyı örgüyle değiştir",
+    }),
+    hint(
+      "Sonlu kesit; periyodik sınır yok. Hücre başına SC: 1, BCC: 2, FCC: 4 atom. Önceki yapıyı Geri al ile getirebilirsin.",
+    ),
+  ]);
+  latticeForm.addEventListener(
+    "submit",
+    safe((event) => {
+      event.preventDefault();
+      if (!latticeForm.reportValidity()) return;
+      commitStructure(createLattice(lattice), {
+        reset: true,
+        selected: [],
+        message: "Kübik örgü üretildi. Atom koordinatları düzenlenebilir.",
+      });
+    }),
+  );
+  const xyzFile = el("input", {
+    id: "structure-xyz-file",
+    type: "file",
+    accept: ".xyz,text/plain,chemical/x-xyz",
+    hidden: true,
+  });
+  xyzFile.addEventListener(
+    "change",
+    safe(async () => {
+      const file = xyzFile.files[0];
+      xyzFile.value = "";
+      if (!file || state.busy) return;
+      if (file.size > STRUCTURE_LIMITS.fileBytes)
+        throw new Error("XYZ dosyası 256 KiB sınırını aşıyor.");
+      setBusy(true);
+      try {
+        const document = parseXYZ(
+          await file.text(),
+          file.name.replace(/\.xyz$/i, ""),
+        );
+        commitStructure(document, {
+          reset: true,
+          selected: [],
+          message:
+            "XYZ yapısı Å birimiyle açıldı. Önceki yapı Geri al ile geri getirilebilir.",
+        });
+      } finally {
+        setBusy(false);
+      }
+    }),
+  );
+  $("library").replaceChildren(
+    section("Özel yapı", [
+      el("label", { class: "field" }, ["Yapı adı", name]),
+      button(
+        "Hazır yapıları aç",
+        () => {
+          state.structureActive = false;
+          renderMaterials(true);
+          persist();
+        },
+        "full",
+      ),
+      button(
+        "Boş yapı oluştur",
+        () =>
+          commitStructure(emptyStructure(), {
+            reset: true,
+            selected: [],
+            message:
+              "Boş yapı açıldı. Önceki düzen Geri al ile geri getirilebilir.",
+          }),
+        "full",
+      ),
+    ]),
+    section("Atom ekle", [
+      atomForm,
+      hint(
+        `Sınır: ${STRUCTURE_LIMITS.atoms} atom; her eksende ±${STRUCTURE_LIMITS.coordinate} Å.`,
+      ),
+    ]),
+    section("Kübik örgü üret", [
+      el("details", { class: "structure-lattice" }, [
+        el("summary", { text: "SC / BCC / FCC ayarları" }),
+        latticeForm,
+      ]),
+    ]),
+    section("Yapı dosyaları", [
+      row([
+        button("XYZ aç", () => xyzFile.click()),
+        button("XYZ indir", downloadXYZ),
+      ]),
+      xyzFile,
+      hint(
+        "XYZ: tek kare, Element x y z, Å. Atom kimlikleri XYZ'de saklanmaz. Üstteki Kaydet, yapı kimliklerini ve birimini JSON olarak korur.",
+      ),
+    ]),
+  );
+  const undo = button("Geri al", () =>
+    structureHistory("structureUndo", "structureRedo"),
+  );
+  const redo = button("Yinele", () =>
+    structureHistory("structureRedo", "structureUndo"),
+  );
+  undo.disabled = !state.structureUndo.length;
+  redo.disabled = !state.structureRedo.length;
+  const clear = button("Seçimi temizle", () => {
+    state.structureSelected = [];
+    viewer?.select([]);
+    renderStructureInspector();
+    renderStructureSummary();
+  });
+  $("stage-controls").replaceChildren(
+    undo,
+    redo,
+    clear,
+    el("span", { class: "spacer" }),
+    el("span", { class: "hint", text: "İki atom seç: merkezler arası mesafe" }),
+  );
+  renderStructureInspector();
+  renderStructureSummary();
+  setDetails([
+    "Bu düzenleyici sonlu atom koordinatlarıyla çalışır. 1 Å = 10⁻¹⁰ m. Koordinatlar dosyaya olduğu gibi yazılır; ekrandaki merkezleme veya ölçekleme belge koordinatlarını değiştirmez.",
+    "118 elementin simgesi seçilebilir. Küreler seçim işaretçisidir; fiziksel atom yarıçapı, bağ, enerji, kuvvet, kararlılık, gevşeme veya malzeme özelliği hesaplanmaz. SC, BCC ve FCC üreticileri seçilen geometrik bazı tekrarlar; seçilen elementin bu örgüde kararlı olduğunu söylemez.",
+    "Kübik örgüler [0,nₓa) × [0,nᵧa) × [0,n𝓏a) aralığında üretilen sonlu kesitlerdir; periyodik sınır, hücre vektörü veya görüntü atomu eklenmez. Görünen min–maks ölçüler atom merkezlerinin sınırlarıdır.",
+    `Kaynak sınırları: ${STRUCTURE_LIMITS.atoms} atom, ±${STRUCTURE_LIMITS.coordinate} Å, 256 KiB içe aktarım ve son ${STRUCTURE_LIMITS.history} düzenleme için geri alma. XYZ yalnız tek kare ve dört sütun kabul eder; genişletilmiş XYZ alanları kabul edilmez.`,
+    ...(state.structure.source
+      ? [
+          `İlk kopyalama kaydı: ${state.structure.source.name}; ${state.structure.source.angstrom_per_unit} Å / birimsiz gösterim birimi. Sonraki atom düzenlemeleri bu başlangıç kaydını değiştirmez.`,
+        ]
+      : []),
+  ]);
+  $("export-result").disabled = false;
+}
+function renderStructureSummary() {
+  const summary = structureSummary(state.structure, state.structureSelected);
+  setMetrics([
+    ["Atom", summary.count],
+    ["Element türü", Object.keys(summary.composition).length],
+    [
+      "Seçili çift mesafesi",
+      summary.pairDistance === null ? "—" : fmt(summary.pairDistance, 5),
+      summary.pairDistance === null ? "" : "Å",
+    ],
+  ]);
+  const composition =
+    Object.entries(summary.composition)
+      .map(([symbol, count]) => `${symbol}: ${count}`)
+      .join(" · ") || "Atom eklenmedi";
+  $("below-stage").replaceChildren(
+    el("div", { class: "explanation structure-summary" }, [
+      el("strong", { text: "Bileşim: " }),
+      composition,
+      el("div", {
+        text: `Merkezlerin kapladığı aralık (X × Y × Z): ${summary.extent.map((value) => fmt(value, 4)).join(" × ")} Å`,
+      }),
+      ...(summary.minimum
+        ? [
+            el("div", {
+              text: `Min: ${summary.minimum.map((value) => fmt(value, 4)).join(", ")} Å · Maks: ${summary.maximum.map((value) => fmt(value, 4)).join(", ")} Å`,
+            }),
+          ]
+        : []),
+      ...(summary.coincident
+        ? [
+            el("div", {
+              class: "structure-warning",
+              text: `${summary.coincident} atom başka bir atomla tam aynı konumda. Liste üzerinden ayrı ayrı seçebilirsin.`,
+            }),
+          ]
+        : []),
+    ]),
+  );
+}
+function renderStructureInspector() {
+  const selected = state.structureSelected
+    .map((id) => state.structure.atoms.find((atom) => atom.id === id))
+    .filter(Boolean);
+  const content = [
+    hint(
+      "Bir atomu düzenlemek veya iki atomun mesafesini ölçmek için sahneden ya da listeden seç. Seçili atoma yeniden tıklamak seçimini kaldırır.",
+    ),
+  ];
+  if (selected.length === 1) {
+    const atom = selected[0];
+    let element = atom.element;
+    const position = [...atom.position];
+    const form = el("form", { id: "structure-edit-form" }, [
+      el("p", { class: "structure-atom-id", text: `Atom: ${atom.id}` }),
+      el("label", { class: "field" }, [
+        "Element",
+        structureElementSelect("structure-edit-element", element, (value) => {
+          element = value;
+        }),
+      ]),
+      structureCoordinates("structure-edit", position, (axis, value) => {
+        position[axis] = value;
+      }),
+      el("button", {
+        type: "submit",
+        class: "primary full",
+        text: "Değişikliği uygula",
+      }),
+    ]);
+    form.addEventListener(
+      "submit",
+      safe((event) => {
+        event.preventDefault();
+        if (!form.reportValidity()) return;
+        commitStructure(
+          {
+            ...state.structure,
+            atoms: state.structure.atoms.map((candidate) =>
+              candidate.id === atom.id
+                ? { ...candidate, element, position }
+                : candidate,
+            ),
+          },
+          { message: `${atom.id} elementi ve Å koordinatları güncellendi.` },
+        );
+      }),
+    );
+    content.push(form);
+  } else
+    content.push(
+      el("p", {
+        class: "selection-summary",
+        text:
+          selected.length === 2
+            ? `${selected[0].id} (${selected[0].element}) + ${selected[1].id} (${selected[1].element}) · ${fmt(structureSummary(state.structure, state.structureSelected).pairDistance, 6)} Å`
+            : "Seçili atom yok.",
+      }),
+    );
+  if (selected.length) {
+    const duplicate = button("Çoğalt · X +1 Å", () => {
+      const atoms = clone(state.structure.atoms),
+        ids = [];
+      for (const atom of selected) {
+        const id = nextAtomId(atoms);
+        atoms.push({
+          ...clone(atom),
+          id,
+          position: [atom.position[0] + 1, atom.position[1], atom.position[2]],
+        });
+        ids.push(id);
+      }
+      commitStructure(
+        { ...state.structure, atoms },
+        {
+          selected: ids,
+          message: "Seçili atomlar X yönünde +1 Å kaydırılarak çoğaltıldı.",
+        },
+      );
+    });
+    duplicate.disabled =
+      state.structure.atoms.length + selected.length > STRUCTURE_LIMITS.atoms;
+    content.push(
+      el("div", { class: "structure-selection-actions" }, [
+        duplicate,
+        button(
+          "Seçileni sil",
+          () => {
+            commitStructure(
+              {
+                ...state.structure,
+                atoms: state.structure.atoms.filter(
+                  (atom) => !state.structureSelected.includes(atom.id),
+                ),
+              },
+              { selected: [], message: "Seçili atomlar silindi." },
+            );
+          },
+          "danger",
+        ),
+      ]),
+    );
+  }
+  const search = el("input", {
+    id: "structure-atom-search",
+    type: "search",
+    value: state.structureQuery,
+    placeholder: "Element, ad veya atom kimliği",
+    "aria-label": "Atom listesini filtrele",
+  });
+  search.addEventListener("input", () => {
+    state.structureQuery = search.value;
+    state.structurePage = 0;
+    renderStructureAtomList();
+  });
+  $("inspector").replaceChildren(
+    section("Atom özellikleri", content),
+    section("Atom listesi", [
+      search,
+      el("div", { id: "structure-atom-list", class: "structure-atom-list" }),
+      el("div", { id: "structure-pagination", class: "structure-pagination" }),
+    ]),
+  );
+  renderStructureAtomList();
+}
+function renderStructureAtomList() {
+  const query = state.structureQuery.toLocaleLowerCase("tr-TR").trim();
+  const filtered = state.structure.atoms.filter((atom) => {
+    const element = elements.find(
+      (candidate) => candidate.symbol === atom.element,
+    );
+    return `${atom.id} ${atom.element} ${element?.name} ${element?.name_en}`
+      .toLocaleLowerCase("tr-TR")
+      .includes(query);
+  });
+  const pageCount = Math.max(
+    1,
+    Math.ceil(filtered.length / STRUCTURE_LIMITS.pageSize),
+  );
+  state.structurePage = Math.min(state.structurePage, pageCount - 1);
+  const offset = state.structurePage * STRUCTURE_LIMITS.pageSize;
+  $("structure-atom-list").replaceChildren(
+    ...filtered
+      .slice(offset, offset + STRUCTURE_LIMITS.pageSize)
+      .map((atom) => {
+        const item = button(
+          "",
+          () => selectStructureAtom(atom.id),
+          `structure-atom ${state.structureSelected.includes(atom.id) ? "selected" : ""}`,
+        );
+        item.setAttribute(
+          "aria-pressed",
+          String(state.structureSelected.includes(atom.id)),
+        );
+        item.append(
+          el("strong", { text: `${atom.element} · ${atom.id}` }),
+          el("small", {
+            text: `${atom.position.map((value) => fmt(value, 4)).join(" / ")} Å`,
+          }),
+        );
+        return item;
+      }),
+    ...(filtered.length ? [] : [hint("Eşleşen atom yok.")]),
+  );
+  const previous = button("Önceki", () => {
+    state.structurePage--;
+    renderStructureAtomList();
+  });
+  const next = button("Sonraki", () => {
+    state.structurePage++;
+    renderStructureAtomList();
+  });
+  previous.disabled = state.structurePage === 0;
+  next.disabled = state.structurePage + 1 >= pageCount;
+  $("structure-pagination").replaceChildren(
+    previous,
+    el("span", {
+      text: `${state.structurePage + 1}/${pageCount} · ${filtered.length} atom`,
+    }),
+    next,
+  );
+}
+function renderPresetMaterial(reset) {
   const material =
     materialPresets.find((m) => m.id === state.material) || materialPresets[0];
   state.material = material.id;
@@ -1400,12 +2107,42 @@ function renderCellChart() {
 }
 
 async function importEnvelope(data) {
+  if (data?.format === "yorunge-structure") {
+    const document = validateStructure(data);
+    state.structure = document;
+    state.structureActive = true;
+    state.structureSelected = [];
+    state.structureUndo = [];
+    state.structureRedo = [];
+    state.structurePage = 0;
+    state.structureQuery = "";
+    state.mode = "materials";
+    state.epoch++;
+    renderMode();
+    return;
+  }
   if (
+    !data ||
+    typeof data !== "object" ||
     data.format !== "yorunge-science" ||
-    data.version !== 1 ||
+    ![1, 2].includes(data.version) ||
     !modeInfo[data.mode]
   )
-    throw new Error("Bu dosya Yörünge v0.3 deney biçiminde değil.");
+    throw new Error(
+      "Bu dosya desteklenen bir Yörünge deney belgesi değil (v1 veya v2 gerekli).",
+    );
+  let structureWorkspace;
+  if (data.version === 2) {
+    if (
+      !data.structure_workspace ||
+      typeof data.structure_workspace.active !== "boolean"
+    )
+      throw new Error("Yapı çalışma alanı kaydı geçersiz.");
+    structureWorkspace = {
+      document: validateStructure(data.structure_workspace.document),
+      active: data.structure_workspace.active,
+    };
+  }
   if (data.mode === "molecules") {
     const result = await post("/api/chemistry/analyze", data.scene);
     state.mol = result.scene;
@@ -1436,6 +2173,16 @@ async function importEnvelope(data) {
     state.material = data.material;
     state.layers = data.layers;
     state.spacing = data.spacing;
+    if (!structureWorkspace) state.structureActive = false;
+  }
+  if (structureWorkspace) {
+    state.structure = structureWorkspace.document;
+    state.structureActive = structureWorkspace.active;
+    state.structureSelected = [];
+    state.structureUndo = [];
+    state.structureRedo = [];
+    state.structurePage = 0;
+    state.structureQuery = "";
   }
   state.mode = data.mode;
   state.epoch++;
@@ -1490,7 +2237,9 @@ $("export-result").addEventListener("click", () =>
       ? state.analysis
       : state.mode === "cells"
         ? state.cellResult
-        : state.materialGraph,
+        : state.structureActive
+          ? state.structure
+          : state.materialGraph,
   ),
 );
 async function start() {
@@ -1550,9 +2299,8 @@ async function start() {
         renderMode();
       }
     } else renderMode();
-    const requested = new URLSearchParams(location.search).get("alan");
-    if (modeInfo[requested]) {
-      state.mode = requested;
+    if (modeInfo[requestedMode]) {
+      state.mode = requestedMode;
       renderMode();
     }
     notify("Laboratuvar hazır. Bir deney seç veya görünümü incele.");

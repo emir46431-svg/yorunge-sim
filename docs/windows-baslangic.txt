@@ -1,35 +1,24 @@
-YÖRÜNGE v0.4 — WINDOWS BAŞLANGIÇ
+YÖRÜNGE STUDIO v0.5 — WINDOWS
 
-1. ZIP dosyasını bir klasöre çıkar.
-2. yorunge-sim.exe dosyasını çift tıklayarak aç.
-3. Açılan pencereyi açık tut ve tarayıcıdan şu adrese git:
-   http://127.0.0.1:7878
+1. ZIP paketini tamamen bir klasöre çıkar.
+2. Yorunge.exe dosyasına çift tıkla. Tüm dosyaları aynı klasörde tut.
+3. Malzemeler > Özel yapı düzenle: atom ekle, Å koordinatlarını değiştir,
+   örgü üret veya XYZ dosyası aç. Üstteki diğer çalışma alanlarını seç.
+4. Deneylerini Kaydet ile JSON, hesap sonuçlarını CSV olarak sakla.
 
-Hazır deneylerden birini seç, nesnelerin özelliklerini değiştir ve Çalıştır'a bas.
-Sahneyi Kaydet ile JSON dosyasına aktarabilirsin.
-Programı durdurmak için terminal penceresini kapat veya Ctrl+C tuşlarına bas.
+Uygulama kendi penceresinde açılır. Kapatıldığında kendi hesap motoru da
+kapanır. Rust/Node kurulumu gerekmez. Windows x64, .NET Framework 4.8+
+ve Microsoft WebView2 Runtime gerekir. Eksik runtime için resmi adres
+uygulamada gösterilir. Masaüstü kısayolu Yorunge.exe dosyasını hedefler.
 
-Rust veya Node.js kurulumu gerekmez. Deneyler yerel bilgisayarda hesaplanır.
-7878 portu kullanılıyorsa, önce mevcut Yörünge penceresini kontrol et.
-Alternatif port için bu klasörde PowerShell açıp şunu çalıştır:
-  .\yorunge-sim.exe serve 7879
-Ardından http://127.0.0.1:7879 adresine git.
+Yerel deney verileri/günlükler: %LOCALAPPDATA%\Yorunge\Studio
+Kullanılan yerel port: 17971. Meşgul porttaki başka servise bağlanılmaz.
+Önceki tarayıcı oturumunun kayıtları otomatik taşınmaz; eski alandan
+JSON kaydedip masaüstü uygulamasında açabilirsin.
 
-Bu sürüm molekül düzenleme, 118 element, beş malzeme örgüsü ve basit hücre
-taşınımı içerir. Her alanın model sınırları arayüzde açıklanır. Tüm kimyasal
-tepkimeleri veya gerçek canlı hücre davranışını öngörmez.
-Önceki 3B mekanik /mekanik, hava dirençli 2B atış /atis adresindedir.
-
-README.md: özellikler, API ve geliştirme talimatları.
-docs/mechanics.md: hesap modeli, birimler ve sınırlar.
-docs/chemistry.md, docs/cells.md: molekül ve hücre modelleri.
-docs/elements-materials.md: 118 elementin kaynağı ve malzeme geometrileri.
-docs/roadmap.md: diğer fizik alanları için geliştirme planı.
-docs/*licenses.txt: üçüncü taraf yazılım bildirimleri.
-
-Windows x64 üzerinde geliştirilip denendi. Farklı Windows kurulumlarında ayrıca
-uyumluluk testi yapılmadı. İnternette herkese açık bir sunucu olarak tasarlanmamıştır.
-
-Yeni biyoloji Ar-Ge: http://127.0.0.1:7878/arge
-Enzim kinetiği, inhibisyon, parametre taraması, deney defteri ve ölçüm CSV'si.
-Kullanım: docs/research-guide.md; model: docs/enzymes.md.
+Alanlar: Özel atom yapıları, 118 element, molekül grafı, hücre taşınımı,
+enzim kinetiği, katı cisim mekaniği, DC direnç ağı, ısıtma/soğuma.
+Bu modellerin kapsamı ayrıdır. Serbest atom dizilimi gerçek maddenin
+kararlılığını veya tepkimelerini öngörmez. Model denklemleri, kullanım ve
+sınırlar README.md ile docs/ klasöründedir. Üçüncü taraf bildirimleri de
+pakette bulunur. Farklı Windows kurulumlarının tümü test edilmedi.

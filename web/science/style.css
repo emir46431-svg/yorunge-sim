@@ -1078,3 +1078,89 @@ footer button {
     scroll-behavior: auto !important;
   }
 }
+
+/* Free-coordinate material editor; these rules do not affect other workspaces. */
+.structure-workspace .structure-coordinates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+}
+.structure-workspace .structure-coordinates input {
+  min-width: 0;
+  padding-inline: 5px;
+  font-variant-numeric: tabular-nums;
+}
+.structure-workspace .structure-coordinates .field {
+  margin-bottom: 9px;
+  font-size: 10px;
+}
+.structure-workspace .structure-lattice summary {
+  cursor: pointer;
+  color: var(--ink);
+  font-size: 11px;
+}
+.structure-workspace .structure-lattice form {
+  margin-top: 12px;
+}
+.structure-workspace .structure-selection-actions {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+}
+.structure-workspace .structure-atom-id {
+  font-size: 11px;
+  color: var(--muted);
+}
+.structure-workspace .structure-atom-list {
+  display: grid;
+  gap: 4px;
+  max-height: 320px;
+  overflow: auto;
+  margin-top: 8px;
+  padding: 2px;
+}
+.structure-workspace .structure-atom {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  padding: 7px 8px;
+}
+.structure-workspace .structure-atom strong {
+  font-size: 11px;
+}
+.structure-workspace .structure-atom small {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.structure-workspace .structure-atom.selected {
+  border-color: var(--teal);
+  background: var(--soft);
+  box-shadow: inset 2px 0 var(--teal);
+}
+.structure-workspace .structure-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5px;
+  margin-top: 8px;
+  font-size: 10px;
+  color: var(--muted);
+}
+.structure-workspace .structure-pagination button {
+  padding: 5px;
+  font-size: 10px;
+}
+.structure-workspace .structure-summary {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+.structure-workspace .structure-warning {
+  color: var(--ink);
+  border-left: 2px solid #bf8c49;
+  padding-left: 7px;
+  margin-top: 5px;
+}
